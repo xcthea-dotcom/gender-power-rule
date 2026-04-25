@@ -5,90 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="用于识别句子中的性别结构、角色期待与权力规训信号的规则版调参页面。"
+      content="一个面向普通用户的性别结构话语识别页面，输入一句话即可获得解释和回应建议。"
     />
-    <title>看见句子里的性别权力结构</title>
+    <title>一句话里，有没有被默认的性别规训？</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@500;700;900&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./user.css" />
   </head>
   <body>
     <div class="page-shell">
-      <div class="ambient ambient-one"></div>
-      <div class="ambient ambient-two"></div>
+      <div class="glow glow-one"></div>
+      <div class="glow glow-two"></div>
 
-      <header class="hero reveal reveal-1">
+      <header class="hero-card">
         <div class="hero-copy">
-          <div class="eyebrow">Rule-Based Demo</div>
+          <div class="eyebrow">User Experience</div>
           <h1 class="hero-title">看见一句话里，<br />被默认掉的性别权力结构。</h1>
           <p class="hero-text">
-            这不是“情绪化解读器”，而是一个把语言里的性别规训、角色期待和权力分配拆开给你看的规则版调参页。
-            先把规则跑通，再继续精修关键词、alias 和槽位。
+            输入一句你听到的话。页面会尽量用简单的话告诉你，这句话可能在默认什么、为什么会让人不舒服，以及你可以怎么回。
           </p>
         </div>
 
-        <div class="hero-aside">
-          <div class="stat-card">
-            <span class="stat-value">30+</span>
-            <span class="stat-label">规则条目</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">6</span>
-            <span class="stat-label">典型场景</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-value">2</span>
-            <span class="stat-label">补词入口</span>
-          </div>
+        <div class="hero-note">
+          <div class="note-label">适合这样用</div>
+          <p>聊天时觉得哪里怪怪的，但一时又说不清。</p>
         </div>
       </header>
 
-      <main class="workspace">
-        <section class="panel input-panel reveal reveal-2">
-          <div class="panel-head">
+      <main class="main-grid">
+        <section class="input-card">
+          <div class="section-head">
             <div>
               <div class="eyebrow">Input</div>
-              <h2 class="panel-title">给它一句话，它会拆开看</h2>
-              <p class="panel-description">
-                这里会先做标准化、alias 匹配、槽位命中和近似匹配，再结合场景给出主规则、候选规则和补词线索。
-              </p>
+              <h2 class="section-title">把一句话放进来</h2>
             </div>
-            <div class="signal-pill">规则模式运行中</div>
+            <div id="contextStatus" class="context-pill">当前场景：不限</div>
           </div>
 
           <div class="field-group">
             <label class="field-label">场景</label>
-            <div id="contextButtons" class="chip-wrap" aria-label="场景选择"></div>
+            <div id="contextButtons" class="context-row" aria-label="场景选择"></div>
           </div>
 
           <div class="field-group">
-            <label for="similarityRange" class="field-label">关键词近似阈值</label>
-            <div class="similarity-control">
-              <input
-                id="similarityRange"
-                class="similarity-range"
-                type="range"
-                min="0.55"
-                max="0.95"
-                step="0.01"
-                value="0.65"
-              />
-              <div class="similarity-meta">
-                <span id="similarityValue" class="similarity-value">65%</span>
-                <span class="micro-note">原词和 alias 优先命中，只有差一点点的表达才会走近似匹配。</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="inputText" class="field-label">输入一句话</label>
-            <div class="textarea-wrap">
+            <label for="userInput" class="field-label">输入一句话</label>
+            <div class="textarea-shell">
               <textarea
-                id="inputText"
+                id="userInput"
                 spellcheck="false"
                 placeholder="例如：女孩别太拼了，以后还是家庭重要。"
               ></textarea>
@@ -96,144 +63,24 @@
             </div>
           </div>
 
-          <div class="input-actions">
-            <button id="clearButton" type="button" class="ghost-button">清空输入</button>
-            <span class="micro-note">先把规则调稳，再考虑接更灵活的解释层。</span>
+          <div class="action-row">
+            <button id="analyzeButton" type="button" class="primary-button">开始分析</button>
+            <button id="clearButton" type="button" class="ghost-button">清空</button>
           </div>
 
-          <div class="field-group examples-group">
+          <div class="field-group">
             <div class="field-label">试试这些例子</div>
-            <div id="exampleList" class="chip-wrap"></div>
+            <div id="exampleList" class="example-list"></div>
           </div>
         </section>
 
-        <section class="panel output-panel reveal reveal-3">
-          <div class="panel-head">
-            <div>
-              <div class="eyebrow">Analysis</div>
-              <h2 class="panel-title">分析结果</h2>
-            </div>
-            <div id="contextStatus" class="signal-pill signal-pill-muted">当前场景：不限</div>
-          </div>
-
-          <div id="analysisRoot" class="analysis-root"></div>
+        <section class="output-card">
+          <div id="resultRoot" class="result-root"></div>
         </section>
       </main>
-
-      <section class="lab-grid">
-        <section class="panel batch-panel reveal reveal-4">
-          <div class="panel-head">
-            <div>
-              <div class="eyebrow">Batch Lab</div>
-              <h2 class="panel-title">一边测句子，一边抓失败模式</h2>
-              <p class="panel-description">
-                一行一句，把那些“应该命中但没命中”的真实表达贴进来。这里会标记命中、擦边和未命中的句子。
-              </p>
-            </div>
-            <div id="batchSummary" class="signal-pill signal-pill-muted">等待批量测试</div>
-          </div>
-
-          <div class="batch-workspace">
-            <div class="batch-entry">
-              <label for="batchInputText" class="field-label">批量句子</label>
-              <div class="textarea-wrap">
-                <textarea
-                  id="batchInputText"
-                  spellcheck="false"
-                  placeholder="一行一句，建议先放 10 到 50 句真实样本。"
-                ></textarea>
-                <div id="batchCount" class="char-count">0 句</div>
-              </div>
-              <div class="input-actions">
-                <button id="batchClearButton" type="button" class="ghost-button">清空批量区</button>
-                <span class="micro-note">先抓高频失败样本，再决定补词还是新增规则。</span>
-              </div>
-            </div>
-
-            <div class="batch-feed">
-              <div class="field-label">测试结果</div>
-              <div id="batchResultsRoot" class="batch-results"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel tuning-panel reveal reveal-5">
-          <div class="panel-head">
-            <div>
-              <div class="eyebrow">Keyword Radar</div>
-              <h2 class="panel-title">把没命中的句子，变成下一轮可加的词</h2>
-              <p class="panel-description">
-                主分析区和 Batch Lab 都能把候选短语加到本地补词。补词会立刻参与当前页面匹配，确认后再写回 `rules.js`。
-              </p>
-            </div>
-            <div id="draftSummary" class="signal-pill signal-pill-muted">本地补词 0 条</div>
-          </div>
-
-          <div class="draft-toolbar">
-            <button id="connectRulesButton" type="button" class="ghost-button">连接 rules.js</button>
-            <button id="writeRulesButton" type="button" class="ghost-button">写回 rules.js</button>
-            <button id="clearDraftsButton" type="button" class="ghost-button">清空本地补词</button>
-            <button id="exportDraftsButton" type="button" class="ghost-button">导出补词草稿</button>
-          </div>
-
-          <div id="rulesFileStatus" class="draft-empty">
-            先用主分析区或 Batch Lab 把候选短语加进本地补词。连接 `rules.js` 后，就能把这些补词直接写回 `aliasMap`。
-          </div>
-          <div id="draftListRoot" class="draft-list-root"></div>
-          <div id="keywordHintRoot" class="hint-root"></div>
-        </section>
-      </section>
-
-      <section class="panel system-panel reveal reveal-6">
-        <div class="system-copy">
-          <div class="eyebrow">How It Works</div>
-          <h2 class="panel-title">先让失败模式被看见，再精进规则</h2>
-          <div class="mechanic-list">
-            <div class="mechanic-step">
-              <div class="step-index">1</div>
-              <div>
-                <div class="step-title">槽位命中</div>
-                <p class="step-copy">不是只看两组关键词，而是按槽位判断哪些表达必须命中，哪些表达只是加分。</p>
-              </div>
-            </div>
-            <div class="mechanic-step">
-              <div class="step-index">2</div>
-              <div>
-                <div class="step-title">批量找盲点</div>
-                <p class="step-copy">先把真实句子一批批跑过去，看哪些只是差一个词，哪些其实需要新增规则。</p>
-              </div>
-            </div>
-            <div class="mechanic-step">
-              <div class="step-index">3</div>
-              <div>
-                <div class="step-title">人工补词</div>
-                <p class="step-copy">根据接近规则、缺失槽位和候选短语，再决定把哪些词加进 aliasMap。</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="system-side">
-          <div class="sub-panel">
-            <div class="eyebrow">Rule Library</div>
-            <div id="libraryMetrics" class="metric-grid"></div>
-          </div>
-
-          <div class="sub-panel">
-            <div class="eyebrow">Next</div>
-            <h3 class="sub-panel-title">下一步可以做什么</h3>
-            <ol class="roadmap-list">
-              <li>继续补 aliasMap，把高频改写句式并进已有规则。</li>
-              <li>把批量区里反复出现的失败句子整理成固定回归样本。</li>
-              <li>给每条规则补反例，避免一边补词一边把误判放大。</li>
-              <li>规则版稳定后，再接更灵活的服务端语义辅助。</li>
-            </ol>
-          </div>
-        </div>
-      </section>
     </div>
 
     <script src="./rules.js"></script>
-    <script src="./app.js"></script>
+    <script src="./user.js"></script>
   </body>
 </html>
