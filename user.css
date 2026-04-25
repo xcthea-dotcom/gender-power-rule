@@ -267,7 +267,7 @@ body::before {
 .context-chip.is-active,
 .chip-button.is-active {
   background: var(--ink);
-  color: #fffdfa;
+  color: var(--ink);
   border-color: var(--ink);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
