@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="一个面向普通用户的性别结构话语识别页面，输入一句话即可获得解释和回应建议。"
+    />
+    <title>一句话里，有没有被默认的性别规训？</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./user.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="glow glow-one"></div>
+      <div class="glow glow-two"></div>
+
+      <header class="hero-card">
+        <div class="hero-copy">
+          <div class="eyebrow">User Experience</div>
+          <h1 class="hero-title">看见一句话里，<br />被默认掉的性别权力结构。</h1>
+          <p class="hero-text">
+            输入一句你听到的话。页面会尽量用简单的话告诉你，这句话可能在默认什么、为什么会让人不舒服，以及你可以怎么回。
+          </p>
+        </div>
+
+        <div class="hero-note">
+          <div class="note-label">适合这样用</div>
+          <p>聊天时觉得哪里怪怪的，但一时又说不清。</p>
+        </div>
+      </header>
+
+      <main class="main-grid">
+        <section class="input-card">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">Input</div>
+              <h2 class="section-title">把一句话放进来</h2>
+            </div>
+            <div id="contextStatus" class="context-pill">当前场景：不限</div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">场景</label>
+            <div id="contextButtons" class="context-row" aria-label="场景选择"></div>
+          </div>
+
+          <div class="field-group">
+            <label for="userInput" class="field-label">输入一句话</label>
+            <div class="textarea-shell">
+              <textarea
+                id="userInput"
+                spellcheck="false"
+                placeholder="例如：女孩别太拼了，以后还是家庭重要。"
+              ></textarea>
+              <div id="charCount" class="char-count">0 字</div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button id="analyzeButton" type="button" class="primary-button">开始分析</button>
+            <button id="clearButton" type="button" class="ghost-button">清空</button>
+          </div>
+
+          <div class="field-group">
+            <div class="field-label">试试这些例子</div>
+            <div id="exampleList" class="example-list"></div>
+          </div>
+        </section>
+
+        <section class="output-card">
+          <div id="resultRoot" class="result-root"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./rules.js"></script>
+    <script src="./user.js"></script>
+  </body>
+</html>
