@@ -955,6 +955,28 @@ function buildAnalysisPages(analysis) {
   return pages.slice(0, 2);
 }
 
+function renderNearMissSupport(text, selectedContext, currentRuleId) {
+  const nearMisses = getNearMisses(text, selectedContext)
+    .filter((item) => item.rule_id !== currentRuleId)
+    .slice(0, 1);
+
+  if (!nearMisses.length) {
+    return "";
+  }
+
+  const item = nearMisses[0];
+  const supportCopy =
+    item.missingRequiredCount > 0
+      ? `接近方向：${item.name}。还差 ${item.missingRequiredCount} 个关键槽位。`
+      : `接近方向：${item.name}。`;
+
+  return `
+    <div class="helper-note is-muted">
+      <strong>接近方向：</strong>${escapeHtml(supportCopy)}
+    </div>
+  `;
+}
+
 function renderContextButtons() {
   refs.contextButtons.innerHTML = (contextOptions ?? [])
     .map((context) => {
@@ -1201,6 +1223,7 @@ function renderAnalysis() {
         }
       </div>
 
+      ${currentPage?.sourceLabel === "语义接近" ? renderNearMissSupport(state.input, state.selectedContext, currentRule.rule_id) : ""}
       ${renderSemanticStatus(state.input, state.selectedContext)}
     </div>
   `;
