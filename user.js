@@ -13,6 +13,11 @@ const confidenceRank = { low: 1, medium: 2, high: 3 };
 const fallbackRuleId = "R030";
 const semanticEndpoint = "/api/semantic-assist";
 const semanticTimeoutMs = 12000;
+const nearMissGenericWords = new Set([
+  "女生", "女孩", "女人", "女性", "女的",
+  "要", "应该", "就该", "还是要", "该",
+  "别", "不要", "不该", "不能"
+]);
 
 const state = {
   input: examples?.[0] ?? "",
@@ -188,12 +193,24 @@ function matchRule(text, rule, allowPartial = false) {
 
   return {
     ...rule,
+    slotHits,
     hitWords: Array.from(new Set(hitWords)),
     matchedSlotCount,
     weightedSlotScore,
     missingRequiredCount,
     score: hitWords.length + matchedSlotCount + weightedSlotScore
   };
+}
+
+function getNearMissStrength(hitWords = []) {
+  return hitWords.reduce((stats, word) => {
+    if (nearMissGenericWords.has(word)) {
+      stats.genericHitCount += 1;
+    } else {
+      stats.strongHitCount += 1;
+    }
+    return stats;
+  }, { strongHitCount: 0, genericHitCount: 0 });
 }
 
 function analyzeText(text, selectedContext) {
@@ -414,6 +431,7 @@ function getNearMisses(text, selectedContext) {
       if (!partial || partial.matchedSlotCount === 0) {
         return null;
       }
+      const strength = getNearMissStrength(partial.hitWords);
 
       const supportedContexts = ruleContextMap?.[rule.rule_id] ?? [];
       const contextBoost =
@@ -423,11 +441,15 @@ function getNearMisses(text, selectedContext) {
 
       return {
         ...partial,
+        ...strength,
         partialScore:
           partial.matchedSlotCount * 2 +
           partial.weightedSlotScore -
           partial.missingRequiredCount +
-          contextBoost
+          contextBoost +
+          strength.strongHitCount * 2 -
+          strength.genericHitCount -
+          (strength.strongHitCount === 0 && strength.genericHitCount > 0 ? 4 : 0)
       };
     })
     .filter(Boolean)
