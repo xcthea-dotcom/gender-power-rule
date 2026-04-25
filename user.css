@@ -392,6 +392,52 @@ textarea:focus {
   gap: 18px;
 }
 
+.result-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.result-tab {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(57, 41, 30, 0.12);
+  background: rgba(255, 255, 255, 0.64);
+  color: var(--ink);
+  font-family: var(--ui-font);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease,
+    color 140ms ease;
+}
+
+.result-tab:hover,
+.result-tab:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(57, 41, 30, 0.22);
+  box-shadow: 0 12px 24px rgba(41, 26, 17, 0.08);
+}
+
+.result-tab.is-active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 241, 232, 0.88));
+  border-color: rgba(143, 47, 27, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 14px 26px rgba(41, 26, 17, 0.09);
+}
+
+.result-tab-meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
 .result-hero {
   padding: 22px;
   border-radius: 28px;

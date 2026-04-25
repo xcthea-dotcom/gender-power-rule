@@ -11,12 +11,13 @@ const {
 const severityRank = { low: 1, medium: 2, high: 3 };
 const confidenceRank = { low: 1, medium: 2, high: 3 };
 const fallbackRuleId = "R030";
-const SEMANTIC_TIMEOUT_MS = 12000;
-const SEMANTIC_ENDPOINT = "/api/semantic-assist";
+const semanticEndpoint = "/api/semantic-assist";
+const semanticTimeoutMs = 12000;
 
 const state = {
   input: examples?.[0] ?? "",
-  selectedContext: "不限",
+  selectedContext: contextOptions?.[0] ?? "不限",
+  resultPageIndex: 0,
   semanticAssist: {
     key: "",
     status: "idle",
@@ -61,10 +62,13 @@ const fallbackRule = rules.find((rule) => rule.rule_id === fallbackRuleId);
 function normalize(text) {
   return String(text ?? "")
     .replace(/[\s\u3000]+/g, "")
-    .replace(/[！]/g, "!")
-    .replace(/[？]/g, "?")
-    .replace(/[，]/g, ",")
-    .replace(/[。]/g, ".")
+    .replace(/[！!]/g, "!")
+    .replace(/[？?]/g, "?")
+    .replace(/[，,]/g, ",")
+    .replace(/[。．.]/g, ".")
+    .replace(/[；;]/g, ";")
+    .replace(/[：:]/g, ":")
+    .replace(/[“”"'`]/g, "")
     .toLowerCase();
 }
 
@@ -269,15 +273,7 @@ function requestSemanticAssist(text, selectedContext) {
   }
 
   const key = getSemanticAssistKey(text, selectedContext);
-
-  if (
-    state.semanticAssist.key === key &&
-    (
-      state.semanticAssist.status === "loading" ||
-      state.semanticAssist.status === "ready" ||
-      state.semanticAssist.status === "error"
-    )
-  ) {
+  if (state.semanticAssist.key === key && ["loading", "ready", "error"].includes(state.semanticAssist.status)) {
     return;
   }
 
@@ -293,7 +289,7 @@ function requestSemanticAssist(text, selectedContext) {
       key,
       status: "error",
       results: [],
-      error: "当前是本地 file 页面，服务端语义辅助只有部署后才能用"
+      error: "当前是本地 file 页面，服务端语义辅助只有部署后才可用。"
     };
     return;
   }
@@ -301,7 +297,7 @@ function requestSemanticAssist(text, selectedContext) {
   window.clearTimeout(state.semanticAssistTimer);
   state.semanticAssistTimer = window.setTimeout(() => {
     Promise.race([
-      fetch(SEMANTIC_ENDPOINT, {
+      fetch(semanticEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -309,7 +305,7 @@ function requestSemanticAssist(text, selectedContext) {
         body: JSON.stringify({
           text,
           context: selectedContext,
-          topK: 2
+          topK: 3
         })
       }).then(async (response) => {
         if (!response.ok) {
@@ -321,7 +317,7 @@ function requestSemanticAssist(text, selectedContext) {
         return payload?.results ?? [];
       }),
       new Promise((_, reject) => {
-        window.setTimeout(() => reject(new Error("semantic timeout")), SEMANTIC_TIMEOUT_MS);
+        window.setTimeout(() => reject(new Error("semantic timeout")), semanticTimeoutMs);
       })
     ])
       .then((results) => {
@@ -348,40 +344,12 @@ function requestSemanticAssist(text, selectedContext) {
           results: [],
           error:
             error?.message === "semantic timeout"
-              ? "语义辅助超时，已自动跳过"
-              : error?.message || "语义辅助暂不可用"
+              ? "语义辅助超时，已自动跳过。"
+              : error?.message || "语义辅助暂时不可用。"
         };
         renderResult();
       });
-  }, 450);
-}
-
-function renderSemanticAssist(text, selectedContext) {
-  const key = getSemanticAssistKey(text, selectedContext);
-
-  if (state.semanticAssist.key !== key || state.semanticAssist.status === "idle") {
-    return "";
-  }
-
-  if (state.semanticAssist.status === "loading") {
-    return `
-      <div class="hint-block">
-        <strong>语义辅助</strong>
-        正在请求服务端语义辅助。这不是进度条；如果 12 秒内没结果，会自动跳过。
-      </div>
-    `;
-  }
-
-  if (state.semanticAssist.status === "error") {
-    return `
-      <div class="hint-block">
-        <strong>语义辅助</strong>
-        ${escapeHtml(state.semanticAssist.error)}
-      </div>
-    `;
-  }
-
-  return "";
+  }, 400);
 }
 
 function resolveSemanticRule(result) {
@@ -394,14 +362,12 @@ function resolveSemanticRule(result) {
     (result.name ? rules.find((rule) => rule.name === result.name) : null);
 
   if (!matchedRule) {
-    return result;
+    return null;
   }
 
   return {
     ...matchedRule,
     ...result,
-    rule_id: result.rule_id ?? matchedRule.rule_id,
-    name: result.name ?? matchedRule.name,
     labels: result.labels ?? matchedRule.labels ?? [],
     confidence_default: result.confidence_default ?? matchedRule.confidence_default,
     severity_default: result.severity_default ?? matchedRule.severity_default,
@@ -414,28 +380,26 @@ function resolveSemanticRule(result) {
   };
 }
 
-function getSemanticPrimary(text, selectedContext) {
+function getSemanticCandidates(text, selectedContext) {
   const key = getSemanticAssistKey(text, selectedContext);
 
   if (state.semanticAssist.key !== key || state.semanticAssist.status !== "ready") {
-    return null;
+    return [];
   }
 
-  if (!state.semanticAssist.results.length) {
-    return null;
-  }
+  return (state.semanticAssist.results ?? [])
+    .map((item) => {
+      const resolved = resolveSemanticRule(item);
+      if (!resolved) {
+        return null;
+      }
 
-  const primary = resolveSemanticRule(state.semanticAssist.results[0]);
-
-  if (!primary) {
-    return null;
-  }
-
-  return {
-    ...primary,
-    semanticSource: true,
-    semanticSimilarity: Number(primary.semanticSimilarity || 0)
-  };
+      return {
+        ...resolved,
+        semanticSimilarity: Number(item.semanticSimilarity || resolved.semanticSimilarity || 0)
+      };
+    })
+    .filter(Boolean);
 }
 
 function getNearMisses(text, selectedContext) {
@@ -471,27 +435,198 @@ function getNearMisses(text, selectedContext) {
     .slice(0, 2);
 }
 
-function renderApproxRuleCard(rule, sourceLabel, score, nearMisses = []) {
+function getBadges(items = []) {
+  return items
+    .filter(Boolean)
+    .map((item) => {
+      const toneClass =
+        item.tone === "medium" ? " medium" :
+        item.tone === "low" ? " low" :
+        item.tone === "high" ? " high" :
+        "";
+      return `<span class="badge${toneClass}">${escapeHtml(item.label)}</span>`;
+    })
+    .join("");
+}
+
+function renderSemanticHint() {
+  if (state.semanticAssist.status === "idle") {
+    return "";
+  }
+
+  if (state.semanticAssist.status === "loading") {
+    return `
+      <div class="hint-block">
+        <strong>语义辅助</strong>
+        正在补充另一种可能的分析方向。
+      </div>
+    `;
+  }
+
+  if (state.semanticAssist.status === "error") {
+    return `
+      <div class="hint-block">
+        <strong>语义辅助</strong>
+        ${escapeHtml(state.semanticAssist.error)}
+      </div>
+    `;
+  }
+
+  return "";
+}
+
+function buildAnalysisPages(analysis) {
+  const result = analysis?.primary ?? fallbackRule;
+  const topMatches = analysis?.topMatches ?? [];
+  const nearMisses = getNearMisses(state.input, state.selectedContext);
+  const semanticCandidates = getSemanticCandidates(state.input, state.selectedContext);
+  const pages = [];
+  const usedRuleIds = new Set();
+
+  const pushPage = (page) => {
+    if (!page?.rule) {
+      return;
+    }
+
+    const ruleId = page.rule.rule_id;
+    if (ruleId && usedRuleIds.has(ruleId)) {
+      return;
+    }
+
+    if (ruleId) {
+      usedRuleIds.add(ruleId);
+    }
+
+    pages.push(page);
+  };
+
+  if (result.rule_id !== fallbackRuleId) {
+    pushPage({
+      sourceLabel: "规则命中",
+      introTitle: "这是当前最优先的命中结果",
+      introCopy: "优先按规则命中和分数排序，它是当前最稳的主分析。",
+      rule: result,
+      badges: [
+        { label: result.confidence_default ?? "low" },
+        { label: result.severity_default ?? "low" },
+        { label: state.selectedContext, tone: "low" }
+      ],
+      supportTitle: "命中词",
+      supportCopy: result.hitWords?.slice(0, 8).join("、") || "无"
+    });
+  }
+
+  semanticCandidates.forEach((candidate) => {
+    if (pages.length >= 2) {
+      return;
+    }
+
+    pushPage({
+      sourceLabel: "语义接近",
+      introTitle: "这是语义上也很接近的一种解释",
+      introCopy: "它不一定排到主命中，但和这句话的整体语义很贴近，可以作为第二分析参考。",
+      rule: candidate,
+      badges: [
+        { label: `相似度 ${formatPercent(candidate.semanticSimilarity)}`, tone: "medium" },
+        { label: candidate.confidence_default ?? "low" },
+        { label: state.selectedContext, tone: "low" }
+      ],
+      supportTitle: "语义来源",
+      supportCopy: "来自服务端语义辅助返回的候选规则。"
+    });
+  });
+
+  const secondMatched = topMatches.find((item) => item.rule_id !== result.rule_id && item.rule_id !== fallbackRuleId);
+  if (pages.length < 2 && secondMatched) {
+    pushPage({
+      sourceLabel: "第二分析",
+      introTitle: "另一条也比较接近的规则命中",
+      introCopy: "它同样是规则层面接得住的解释，只是优先度低于当前主命中。",
+      rule: secondMatched,
+      badges: [
+        { label: `分数 ${secondMatched.totalScore ?? secondMatched.score ?? 0}`, tone: "medium" },
+        { label: secondMatched.confidence_default ?? "low" },
+        { label: state.selectedContext, tone: "low" }
+      ],
+      supportTitle: "命中词",
+      supportCopy: secondMatched.hitWords?.slice(0, 8).join("、") || "无"
+    });
+  }
+
+  nearMisses.forEach((candidate) => {
+    if (pages.length >= 2) {
+      return;
+    }
+
+    pushPage({
+      sourceLabel: "接近方向",
+      introTitle: "这句更像在往这个方向靠近",
+      introCopy: "它没有完全命中，但已命中的词和缺失槽位说明这是一个很接近的判断方向。",
+      rule: candidate,
+      badges: [
+        { label: `近失配 ${candidate.partialScore ?? 0}`, tone: "medium" },
+        { label: candidate.confidence_default ?? "low" },
+        { label: state.selectedContext, tone: "low" }
+      ],
+      supportTitle: "接近方向",
+      supportCopy:
+        candidate.missingRequiredCount > 0
+          ? `还差：${candidate.missingRequiredCount} 个关键槽位`
+          : candidate.name
+    });
+  });
+
+  if (!pages.length) {
+    pushPage({
+      sourceLabel: "暂未稳定命中",
+      introTitle: "这句话当前没有足够稳定的分析",
+      introCopy: "可以再补一点上下文，或者继续完善规则后再看。",
+      rule: fallbackRule,
+      badges: [{ label: state.selectedContext, tone: "low" }],
+      supportTitle: "继续判断",
+      supportCopy: "看看它是不是在要求你更顺从、缩小自己、放弃发展，或者把责任更多推回女性身上。"
+    });
+  }
+
+  return pages.slice(0, 2);
+}
+
+function renderResultCard(page, pages) {
+  const currentIndex = Math.min(state.resultPageIndex, Math.max(pages.length - 1, 0));
+  state.resultPageIndex = currentIndex;
+  const rule = page.rule ?? fallbackRule;
+
   refs.resultRoot.innerHTML = `
     <div class="result-card">
+      ${
+        pages.length > 1
+          ? `
+            <div class="result-tabs">
+              ${pages.map((item, index) => `
+                <button
+                  type="button"
+                  class="result-tab${index === currentIndex ? " is-active" : ""}"
+                  data-result-page="${index}"
+                >
+                  <span>${escapeHtml(index === 0 ? "分析 1" : "分析 2")}</span>
+                  <span class="result-tab-meta">${escapeHtml(item.sourceLabel)}</span>
+                </button>
+              `).join("")}
+            </div>
+          `
+          : ""
+      }
+
       <div class="result-hero">
-        <div class="panel-kicker">${escapeHtml(sourceLabel)}</div>
+        <div class="panel-kicker">${escapeHtml(page.sourceLabel)}</div>
         <h2 class="result-title">${escapeHtml(rule.name ?? fallbackRule.name)}</h2>
         <p class="result-copy">${escapeHtml(rule.surface_meaning_template ?? fallbackRule.surface_meaning_template)}</p>
-        <div class="badge-row">
-          ${
-            typeof score === "number"
-              ? `<span class="badge medium">近似度 ${formatPercent(score)}</span>`
-              : `<span class="badge medium">规则近似</span>`
-          }
-          <span class="badge">${escapeHtml(rule.confidence_default ?? "medium")}</span>
-          <span class="badge low">${escapeHtml(state.selectedContext)}</span>
-        </div>
+        <div class="badge-row">${getBadges(page.badges)}</div>
       </div>
 
       <div class="hint-block">
-        <strong>说明</strong>
-        这句话没有精确命中现有规则，以下分析基于最接近的候选规则生成，适合作为参考。
+        <strong>${escapeHtml(page.introTitle)}</strong>
+        ${escapeHtml(page.introCopy)}
       </div>
 
       <div class="result-grid">
@@ -515,12 +650,21 @@ function renderApproxRuleCard(rule, sourceLabel, score, nearMisses = []) {
         </div>
 
         <div class="info-panel">
-          <div class="info-title">接近的方向</div>
-          <div class="panel-copy">${escapeHtml(nearMisses.map((item) => item.name).join("、") || rule.name || "暂无")}</div>
+          <div class="info-title">${escapeHtml(page.supportTitle)}</div>
+          <div class="panel-copy">${escapeHtml(page.supportCopy)}</div>
         </div>
       </div>
+
+      ${renderSemanticHint()}
     </div>
   `;
+
+  refs.resultRoot.querySelectorAll("[data-result-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.resultPageIndex = Number(button.dataset.resultPage);
+      renderResult();
+    });
+  });
 }
 
 function renderContextButtons() {
@@ -534,6 +678,7 @@ function renderContextButtons() {
   refs.contextButtons.querySelectorAll("[data-context]").forEach((button) => {
     button.addEventListener("click", () => {
       state.selectedContext = button.dataset.context;
+      state.resultPageIndex = 0;
       refs.contextStatus.textContent = `当前场景：${state.selectedContext}`;
       renderContextButtons();
       renderResult();
@@ -543,9 +688,7 @@ function renderContextButtons() {
 
 function renderExamples() {
   refs.exampleList.innerHTML = (examples ?? [])
-    .map((example) => {
-      return `<button type="button" class="example-pill" data-example="${escapeHtml(example)}">${escapeHtml(example)}</button>`;
-    })
+    .map((example) => `<button type="button" class="example-pill" data-example="${escapeHtml(example)}">${escapeHtml(example)}</button>`)
     .join("");
 
   refs.exampleList.querySelectorAll("[data-example]").forEach((button) => {
@@ -563,62 +706,8 @@ function renderEmptyState() {
       <div class="result-hero">
         <div class="panel-kicker">Ready</div>
         <h2 class="result-title">先放一句话进来</h2>
-        <p class="result-copy">这里会给你一个保守但清晰的解释，再附上可回应的说法。</p>
+        <p class="result-copy">这里会先给你最优先的分析，如果还有第二种接近的解释，也会用翻页给你展开。</p>
       </div>
-    </div>
-  `;
-}
-
-function renderFallback(analysis) {
-  const nearMisses = getNearMisses(state.input, state.selectedContext);
-  const useSemanticAssist = shouldUseSemanticAssist(analysis);
-
-  if (useSemanticAssist) {
-    requestSemanticAssist(state.input, state.selectedContext);
-  }
-
-  const semanticPrimary = getSemanticPrimary(state.input, state.selectedContext);
-  if (semanticPrimary) {
-    renderApproxRuleCard(
-      semanticPrimary,
-      "语义近似匹配",
-      semanticPrimary.semanticSimilarity,
-      nearMisses
-    );
-    return;
-  }
-
-  if (nearMisses.length > 0) {
-    renderApproxRuleCard(
-      nearMisses[0],
-      "接近的方向",
-      null,
-      nearMisses
-    );
-    return;
-  }
-
-  refs.resultRoot.innerHTML = `
-    <div class="result-card">
-      <div class="result-hero">
-        <div class="panel-kicker">暂未稳命中</div>
-        <h2 class="result-title">${escapeHtml(analysis?.primary?.name ?? fallbackRule.name)}</h2>
-        <p class="result-copy">${escapeHtml(analysis?.primary?.surface_meaning_template ?? fallbackRule.surface_meaning_template)}</p>
-      </div>
-
-      <div class="result-grid">
-        <div class="info-panel">
-          <div class="info-title">这意味着什么</div>
-          <div class="panel-copy">${escapeHtml(analysis?.primary?.hidden_structure_template ?? fallbackRule.hidden_structure_template)}</div>
-        </div>
-
-        <div class="info-panel">
-          <div class="info-title">可以怎么继续判断</div>
-          <div class="panel-copy">看看它是不是在要求你更顺从、缩小自己、放弃发展，或者把责任更多推回女性身上。</div>
-        </div>
-      </div>
-
-      ${useSemanticAssist ? renderSemanticAssist(state.input, state.selectedContext) : ""}
     </div>
   `;
 }
@@ -630,62 +719,15 @@ function renderResult() {
   }
 
   const analysis = analyzeText(state.input, state.selectedContext);
-  const result = analysis?.primary ?? fallbackRule;
-  const useSemanticAssist = shouldUseSemanticAssist(analysis);
 
-  if (result.rule_id === fallbackRuleId) {
-    renderFallback(analysis);
-    return;
-  }
-
-  if (useSemanticAssist) {
+  if (shouldUseSemanticAssist(analysis)) {
     requestSemanticAssist(state.input, state.selectedContext);
   } else if (state.semanticAssist.status !== "idle") {
     resetSemanticAssist();
   }
 
-  refs.resultRoot.innerHTML = `
-    <div class="result-card">
-      <div class="result-hero">
-        <div class="panel-kicker">Main Match</div>
-        <h2 class="result-title">${escapeHtml(result.name)}</h2>
-        <p class="result-copy">${escapeHtml(result.surface_meaning_template ?? "")}</p>
-        <div class="badge-row">
-          <span class="badge">${escapeHtml(result.confidence_default ?? "low")}</span>
-          <span class="badge">${escapeHtml(result.severity_default ?? "low")}</span>
-          <span class="badge low">${escapeHtml(state.selectedContext)}</span>
-        </div>
-      </div>
-
-      <div class="result-grid">
-        <div class="info-panel">
-          <div class="info-title">隐含结构</div>
-          <div class="panel-copy">${escapeHtml(result.hidden_structure_template ?? "")}</div>
-        </div>
-
-        <div class="info-panel">
-          <div class="info-title">可能影响</div>
-          <div class="panel-copy">${escapeHtml(result.impact_template ?? "")}</div>
-        </div>
-      </div>
-
-      <div class="result-grid">
-        <div class="info-panel">
-          <div class="info-title">你可以这样回</div>
-          <div class="panel-copy"><strong>温和版：</strong>${escapeHtml(result.gentle_response ?? "")}</div>
-          <div class="panel-copy"><strong>边界版：</strong>${escapeHtml(result.boundary_response ?? "")}</div>
-          <div class="panel-copy"><strong>反问版：</strong>${escapeHtml(result.question_response ?? "")}</div>
-        </div>
-
-        <div class="info-panel">
-          <div class="info-title">命中词</div>
-          <div class="panel-copy">${escapeHtml(result.hitWords?.slice(0, 6).join("、") || "无")}</div>
-        </div>
-      </div>
-
-      ${useSemanticAssist ? renderSemanticAssist(state.input, state.selectedContext) : ""}
-    </div>
-  `;
+  const pages = buildAnalysisPages(analysis);
+  renderResultCard(pages[state.resultPageIndex] ?? pages[0], pages);
 }
 
 function updateCharCount() {
@@ -694,6 +736,7 @@ function updateCharCount() {
 
 function setInput(value) {
   state.input = value;
+  state.resultPageIndex = 0;
   refs.userInput.value = value;
   updateCharCount();
 }
@@ -701,6 +744,7 @@ function setInput(value) {
 function bindEvents() {
   refs.userInput.addEventListener("input", (event) => {
     state.input = event.target.value;
+    state.resultPageIndex = 0;
     updateCharCount();
   });
 
