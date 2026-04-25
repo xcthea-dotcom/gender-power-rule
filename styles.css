@@ -509,6 +509,44 @@ textarea:focus {
   line-height: 1.8;
 }
 
+.result-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.result-tab {
+  display: grid;
+  gap: 4px;
+  min-width: 120px;
+  padding: 12px 14px;
+  border: 1px solid rgba(55, 36, 21, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--ink);
+  font-family: var(--ui-font);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.result-tab:hover {
+  transform: translateY(-1px);
+  border-color: rgba(158, 53, 25, 0.24);
+}
+
+.result-tab.is-active {
+  border-color: rgba(158, 53, 25, 0.26);
+  background: rgba(158, 53, 25, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(158, 53, 25, 0.08);
+}
+
+.result-tab-meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
 .analysis-hero {
   display: flex;
   align-items: flex-start;

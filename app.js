@@ -19,6 +19,7 @@ const localDraftsKey = "gender-rule-demo-local-drafts-v4";
 const state = {
   input: examples?.[0] ?? "",
   selectedContext: contextOptions?.[0] ?? "不限",
+  resultPageIndex: 0,
   similarityThreshold: 0.65,
   batchInput: (batchSamples?.length ? batchSamples : [
     "女孩要听话一点。",
@@ -528,43 +529,57 @@ function requestSemanticAssist(text, selectedContext) {
   }, 350);
 }
 
-function renderSemanticAssist(text, selectedContext) {
+function resolveSemanticRule(result, text) {
+  if (!result) {
+    return null;
+  }
+
+  const matchedRule =
+    (result.rule_id ? rules.find((rule) => rule.rule_id === result.rule_id) : null) ||
+    (result.name ? rules.find((rule) => rule.name === result.name) : null);
+
+  if (!matchedRule) {
+    return null;
+  }
+
+  const localPartial = text ? matchRule(text, matchedRule, true) : null;
+
+  return {
+    ...matchedRule,
+    ...(localPartial ?? {}),
+    ...result,
+    labels: result.labels ?? matchedRule.labels ?? [],
+    confidence_default: result.confidence_default ?? matchedRule.confidence_default,
+    severity_default: result.severity_default ?? matchedRule.severity_default,
+    surface_meaning_template: result.surface_meaning_template ?? matchedRule.surface_meaning_template,
+    hidden_structure_template: result.hidden_structure_template ?? matchedRule.hidden_structure_template,
+    impact_template: result.impact_template ?? matchedRule.impact_template,
+    gentle_response: result.gentle_response ?? matchedRule.gentle_response,
+    boundary_response: result.boundary_response ?? matchedRule.boundary_response,
+    question_response: result.question_response ?? matchedRule.question_response
+  };
+}
+
+function getSemanticCandidates(text, selectedContext) {
   const key = getSemanticAssistKey(text, selectedContext);
 
-  if (state.semanticAssist.key !== key || state.semanticAssist.status === "idle") {
-    return "";
+  if (state.semanticAssist.key !== key || state.semanticAssist.status !== "ready") {
+    return [];
   }
 
-  if (state.semanticAssist.status === "loading") {
-    return `<div class="helper-note is-muted">正在请求服务端语义辅助。如果 12 秒内没有结果，会自动跳过，不会卡住规则分析。</div>`;
-  }
+  return (state.semanticAssist.results ?? [])
+    .map((item) => {
+      const resolved = resolveSemanticRule(item, text);
+      if (!resolved) {
+        return null;
+      }
 
-  if (state.semanticAssist.status === "error") {
-    return `<div class="helper-note is-muted">语义辅助当前不可用：${escapeHtml(state.semanticAssist.error)}</div>`;
-  }
-
-  if (!state.semanticAssist.results.length) {
-    return `<div class="helper-note is-muted">语义辅助没有给出更接近的候选，当前仍以规则命中结果为准。</div>`;
-  }
-
-  return `
-    <div class="info-card span-2">
-      <h3 class="info-title">语义辅助候选</h3>
-      <div class="candidate-list">
-        ${state.semanticAssist.results.map((item) => `
-          <div class="candidate-card">
-            <div class="candidate-top">
-              <h4 class="candidate-title">${escapeHtml(item.name)}</h4>
-              <div class="candidate-score">相似度 ${formatPercent(item.semanticSimilarity)}</div>
-            </div>
-            <div class="candidate-meta">
-              ${(item.labels ?? []).map((label) => `<span class="hit-chip">${escapeHtml(label)}</span>`).join("") || `<span class="muted-inline">无标签</span>`}
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    </div>
-  `;
+      return {
+        ...resolved,
+        semanticSimilarity: Number(item.semanticSimilarity || resolved.semanticSimilarity || 0)
+      };
+    })
+    .filter(Boolean);
 }
 
 function getNearMisses(text, selectedContext) {
@@ -790,6 +805,13 @@ function createBadge(label, tone = "medium") {
   return `<span class="badge tone-${tone}">${escapeHtml(label)}</span>`;
 }
 
+function getBadges(items = []) {
+  return items
+    .filter(Boolean)
+    .map((item) => createBadge(item.label, item.tone ?? "medium"))
+    .join("");
+}
+
 function getModeLabel(mode) {
   return {
     exact: "原词",
@@ -797,6 +819,140 @@ function getModeLabel(mode) {
     fragment: "片段",
     similar: "近似"
   }[mode] ?? mode;
+}
+
+function renderSemanticStatus(text, selectedContext) {
+  const key = getSemanticAssistKey(text, selectedContext);
+
+  if (state.semanticAssist.key !== key || state.semanticAssist.status === "idle") {
+    return "";
+  }
+
+  if (state.semanticAssist.status === "loading") {
+    return `<div class="helper-note is-muted">正在补充语义方向。如果 12 秒内没有结果，会自动跳过，不会卡住规则分析。</div>`;
+  }
+
+  if (state.semanticAssist.status === "error") {
+    return `<div class="helper-note is-muted">语义辅助当前不可用：${escapeHtml(state.semanticAssist.error)}</div>`;
+  }
+
+  return "";
+}
+
+function buildAnalysisPages(analysis) {
+  const result = analysis?.primary ?? fallbackRule;
+  const topMatches = analysis?.topMatches ?? [];
+  const nearMisses = getNearMisses(state.input, state.selectedContext);
+  const semanticCandidates = getSemanticCandidates(state.input, state.selectedContext);
+  const pages = [];
+  const usedRuleIds = new Set();
+
+  const pushPage = (page) => {
+    if (!page?.rule) {
+      return;
+    }
+
+    const ruleId = page.rule.rule_id;
+    if (ruleId && usedRuleIds.has(ruleId)) {
+      return;
+    }
+
+    if (ruleId) {
+      usedRuleIds.add(ruleId);
+    }
+
+    pages.push(page);
+  };
+
+  if (result.rule_id !== fallbackRuleId) {
+    pushPage({
+      sourceLabel: "规则命中",
+      introTitle: "这是当前最优先的命中结果",
+      introCopy: "优先按规则命中和分数排序，它是当前最稳的主分析。",
+      rule: result,
+      badges: [
+        { label: `置信度 ${result.confidence_default ?? "low"}`, tone: result.confidence_default ?? "low" },
+        { label: `严重度 ${result.severity_default ?? "low"}`, tone: result.severity_default ?? "low" },
+        { label: `场景 ${state.selectedContext}`, tone: "low" }
+      ],
+      supportTitle: "命中词",
+      supportCopy: result.hitWords?.slice(0, 8).join("、") || "无"
+    });
+  }
+
+  semanticCandidates.forEach((candidate) => {
+    if (pages.length >= 2) {
+      return;
+    }
+
+    pushPage({
+      sourceLabel: "语义接近",
+      introTitle: "这是语义上也很接近的一种解释",
+      introCopy: "它不一定排到主命中，但和这句话的整体语义很贴近，可以作为第二分析参考。",
+      rule: candidate,
+      badges: [
+        { label: `相似度 ${formatPercent(candidate.semanticSimilarity)}`, tone: "medium" },
+        { label: `置信度 ${candidate.confidence_default ?? "low"}`, tone: candidate.confidence_default ?? "low" },
+        { label: `场景 ${state.selectedContext}`, tone: "low" }
+      ],
+      supportTitle: "语义来源",
+      supportCopy: "来自服务端语义辅助返回的候选规则。"
+    });
+  });
+
+  const secondMatched = topMatches.find((item) => item.rule_id !== result.rule_id && item.rule_id !== fallbackRuleId);
+  if (pages.length < 2 && secondMatched) {
+    pushPage({
+      sourceLabel: "第二分析",
+      introTitle: "另一条也比较接近的规则命中",
+      introCopy: "它同样是规则层面接得住的解释，只是优先度低于当前主命中。",
+      rule: secondMatched,
+      badges: [
+        { label: `分数 ${secondMatched.totalScore ?? secondMatched.score ?? 0}`, tone: "medium" },
+        { label: `置信度 ${secondMatched.confidence_default ?? "low"}`, tone: secondMatched.confidence_default ?? "low" },
+        { label: `场景 ${state.selectedContext}`, tone: "low" }
+      ],
+      supportTitle: "命中词",
+      supportCopy: secondMatched.hitWords?.slice(0, 8).join("、") || "无"
+    });
+  }
+
+  nearMisses.forEach((candidate) => {
+    if (pages.length >= 2) {
+      return;
+    }
+
+    pushPage({
+      sourceLabel: "接近方向",
+      introTitle: "这句更像在往这个方向靠近",
+      introCopy: "它没有完全命中，但已命中的词和缺失槽位说明这是一个很接近的判断方向。",
+      rule: candidate,
+      badges: [
+        { label: `近失配 ${candidate.partialScore ?? 0}`, tone: "medium" },
+        { label: `置信度 ${candidate.confidence_default ?? "low"}`, tone: candidate.confidence_default ?? "low" },
+        { label: `场景 ${state.selectedContext}`, tone: "low" }
+      ],
+      supportTitle: "接近方向",
+      supportCopy:
+        candidate.missingRequiredCount > 0
+          ? `还差：${candidate.missingRequiredCount} 个关键槽位`
+          : candidate.name
+    });
+  });
+
+  if (!pages.length) {
+    pushPage({
+      sourceLabel: "暂未稳定命中",
+      introTitle: "这句话当前没有足够稳定的分析",
+      introCopy: "可以再补一点上下文，或者继续完善规则后再看。",
+      rule: fallbackRule,
+      badges: [{ label: `场景 ${state.selectedContext}`, tone: "low" }],
+      supportTitle: "继续判断",
+      supportCopy: "看看它是不是在要求你更顺从、缩小自己、放弃发展，或者把责任更多推回女性身上。"
+    });
+  }
+
+  return pages.slice(0, 2);
 }
 
 function renderContextButtons() {
@@ -810,6 +966,7 @@ function renderContextButtons() {
   refs.contextButtons.querySelectorAll("[data-context]").forEach((button) => {
     button.addEventListener("click", () => {
       state.selectedContext = button.dataset.context;
+      state.resultPageIndex = 0;
       renderContextButtons();
       renderAnalysis();
       renderBatchAndHints();
@@ -871,20 +1028,42 @@ function renderAnalysis() {
     resetSemanticAssist();
   }
 
+  const pages = buildAnalysisPages(analysis);
+  const currentIndex = Math.min(state.resultPageIndex, Math.max(pages.length - 1, 0));
+  state.resultPageIndex = currentIndex;
+  const currentPage = pages[currentIndex] ?? pages[0];
+  const currentRule = currentPage?.rule ?? result;
+
   refs.analysisRoot.innerHTML = `
+    ${
+      pages.length > 1
+        ? `
+          <div class="result-tabs">
+            ${pages.map((item, index) => `
+              <button
+                type="button"
+                class="result-tab${index === currentIndex ? " is-active" : ""}"
+                data-result-page="${index}"
+              >
+                <span>${escapeHtml(index === 0 ? "分析 1" : "分析 2")}</span>
+                <span class="result-tab-meta">${escapeHtml(item.sourceLabel)}</span>
+              </button>
+            `).join("")}
+          </div>
+        `
+        : ""
+    }
+
     <div class="analysis-hero">
       <div>
-        <div class="eyebrow">Primary Match</div>
-        <h3 class="result-name">${escapeHtml(result.name ?? "未命中")}</h3>
-        <div class="badge-row">
-          ${createBadge(`置信度 ${result.confidence_default ?? "low"}`, result.confidence_default ?? "low")}
-          ${createBadge(`严重度 ${result.severity_default ?? "low"}`, result.severity_default ?? "low")}
-          ${createBadge(`场景 ${state.selectedContext}`, "low")}
-        </div>
+        <div class="eyebrow">${escapeHtml(currentPage?.sourceLabel ?? "Primary Match")}</div>
+        <h3 class="result-name">${escapeHtml(currentRule.name ?? "未命中")}</h3>
+        <div class="info-copy">${escapeHtml(currentPage?.introCopy ?? "这里展示当前最值得优先看的分析方向。")}</div>
+        <div class="badge-row">${getBadges(currentPage?.badges ?? [])}</div>
       </div>
       <div class="score-tile">
-        <div class="score-label">Score</div>
-        <div class="score-value">${escapeHtml(result.totalScore ?? result.score ?? 0)}</div>
+        <div class="score-label">${escapeHtml(currentPage?.sourceLabel ?? "Score")}</div>
+        <div class="score-value">${escapeHtml(currentRule.totalScore ?? currentRule.score ?? currentRule.partialScore ?? 0)}</div>
       </div>
     </div>
 
@@ -892,45 +1071,51 @@ function renderAnalysis() {
       <div class="info-card">
         <h3 class="info-title">标签</h3>
         <div class="meta-list">
-          ${(result.labels ?? []).map((label) => `<span class="hit-chip">${escapeHtml(label)}</span>`).join("") || `<span class="muted-inline">无</span>`}
+          ${(currentRule.labels ?? []).map((label) => `<span class="hit-chip">${escapeHtml(label)}</span>`).join("") || `<span class="muted-inline">无</span>`}
         </div>
       </div>
 
       <div class="info-card">
-        <h3 class="info-title">命中词</h3>
+        <h3 class="info-title">${escapeHtml(currentPage?.supportTitle ?? "命中词")}</h3>
         <div class="meta-list">
-          ${(result.hitWords ?? []).map((word) => `<span class="hit-chip">${escapeHtml(word)}</span>`).join("") || `<span class="muted-inline">无</span>`}
+          ${
+            currentRule.hitWords?.length
+              ? currentRule.hitWords.map((word) => `<span class="hit-chip">${escapeHtml(word)}</span>`).join("")
+              : `<span class="muted-inline">${escapeHtml(currentPage?.supportCopy ?? "无")}</span>`
+          }
         </div>
       </div>
 
       <div class="info-card">
         <h3 class="info-title">表层意思</h3>
-        <div class="info-copy">${escapeHtml(result.surface_meaning_template ?? "")}</div>
+        <div class="info-copy">${escapeHtml(currentRule.surface_meaning_template ?? "")}</div>
       </div>
 
       <div class="info-card">
         <h3 class="info-title">隐含结构</h3>
-        <div class="info-copy">${escapeHtml(result.hidden_structure_template ?? "")}</div>
+        <div class="info-copy">${escapeHtml(currentRule.hidden_structure_template ?? "")}</div>
       </div>
 
       <div class="info-card">
         <h3 class="info-title">可能影响</h3>
-        <div class="info-copy">${escapeHtml(result.impact_template ?? "")}</div>
+        <div class="info-copy">${escapeHtml(currentRule.impact_template ?? "")}</div>
       </div>
 
       <div class="info-card">
         <h3 class="info-title">回应方式</h3>
         <div class="response-list">
-          <div class="response-item"><span class="response-label">温和版</span>${escapeHtml(result.gentle_response ?? "")}</div>
-          <div class="response-item"><span class="response-label">边界版</span>${escapeHtml(result.boundary_response ?? "")}</div>
-          <div class="response-item"><span class="response-label">反问版</span>${escapeHtml(result.question_response ?? "")}</div>
+          <div class="response-item"><span class="response-label">温和版</span>${escapeHtml(currentRule.gentle_response ?? "")}</div>
+          <div class="response-item"><span class="response-label">边界版</span>${escapeHtml(currentRule.boundary_response ?? "")}</div>
+          <div class="response-item"><span class="response-label">反问版</span>${escapeHtml(currentRule.question_response ?? "")}</div>
         </div>
       </div>
 
       <div class="info-card span-2">
         <h3 class="info-title">槽位命中</h3>
         <div class="slot-list">
-          ${(result.slotHits ?? []).map((slot) => {
+          ${
+            (currentRule.slotHits ?? []).length
+              ? (currentRule.slotHits ?? []).map((slot) => {
             const isHit = slot.matches.length > 0;
             return `
               <div class="slot-row ${isHit ? "is-hit" : "is-miss"}">
@@ -942,7 +1127,9 @@ function renderAnalysis() {
                 </div>
               </div>
             `;
-          }).join("")}
+          }).join("")
+              : `<div class="helper-note is-muted">这一页主要来自${escapeHtml(currentPage?.sourceLabel ?? "辅助分析")}，当前没有稳定的槽位命中明细。</div>`
+          }
         </div>
       </div>
 
@@ -1014,9 +1201,16 @@ function renderAnalysis() {
         }
       </div>
 
-      ${useSemanticAssist ? renderSemanticAssist(state.input, state.selectedContext) : ""}
+      ${renderSemanticStatus(state.input, state.selectedContext)}
     </div>
   `;
+
+  refs.analysisRoot.querySelectorAll("[data-result-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.resultPageIndex = Number(button.dataset.resultPage);
+      renderAnalysis();
+    });
+  });
 
   refs.analysisRoot.querySelectorAll("[data-add-phrase]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1203,6 +1397,7 @@ function updateSimilarityValue() {
 
 function setInput(value) {
   state.input = value;
+  state.resultPageIndex = 0;
   refs.inputText.value = value;
   updateCharCount();
   renderAnalysis();
@@ -1217,6 +1412,7 @@ function setBatchInput(value) {
 function bindEvents() {
   refs.inputText.addEventListener("input", (event) => {
     state.input = event.target.value;
+    state.resultPageIndex = 0;
     updateCharCount();
     renderAnalysis();
   });
