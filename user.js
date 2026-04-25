@@ -77,6 +77,10 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function formatPercent(value) {
+  return `${Math.round(Number(value || 0) * 100)}%`;
+}
+
 function getAliases(keyword) {
   return aliasMap[keyword] ?? aliasMap[normalize(keyword)] ?? [];
 }
@@ -137,8 +141,8 @@ function matchRule(text, rule, allowPartial = false) {
   if ((rule.exclude_any ?? []).some((word) => {
     const normalizedWord = normalize(word);
     return normalizedWord && (
-      normalizedText.includes(normalizedWord)
-      || getAliases(word).some((alias) => normalizedText.includes(normalize(alias)))
+      normalizedText.includes(normalizedWord) ||
+      getAliases(word).some((alias) => normalizedText.includes(normalize(alias)))
     );
   })) {
     return null;
@@ -267,11 +271,11 @@ function requestSemanticAssist(text, selectedContext) {
   const key = getSemanticAssistKey(text, selectedContext);
 
   if (
-    state.semanticAssist.key === key
-    && (
-      state.semanticAssist.status === "loading"
-      || state.semanticAssist.status === "ready"
-      || state.semanticAssist.status === "error"
+    state.semanticAssist.key === key &&
+    (
+      state.semanticAssist.status === "loading" ||
+      state.semanticAssist.status === "ready" ||
+      state.semanticAssist.status === "error"
     )
   ) {
     return;
@@ -377,25 +381,7 @@ function renderSemanticAssist(text, selectedContext) {
     `;
   }
 
-  if (!state.semanticAssist.results.length) {
-    return `
-      <div class="hint-block">
-        <strong>语义辅助</strong>
-        没有找到更接近的规则，当前仍以规则命中结果为准。
-      </div>
-    `;
-  }
-
-  return `
-    <div class="hint-block">
-      <strong>语义上最接近的方向</strong>
-      <div class="mt-2">${state.semanticAssist.results.map((item) => `${escapeHtml(item.name)} (${formatPercent(item.semanticSimilarity)})`).join("、")}</div>
-    </div>
-  `;
-}
-
-function formatPercent(value) {
-  return `${Math.round(Number(value || 0) * 100)}%`;
+  return "";
 }
 
 function resolveSemanticRule(result) {
@@ -404,8 +390,8 @@ function resolveSemanticRule(result) {
   }
 
   const matchedRule =
-    (result.rule_id ? rules.find((rule) => rule.rule_id === result.rule_id) : null)
-    || (result.name ? rules.find((rule) => rule.name === result.name) : null);
+    (result.rule_id ? rules.find((rule) => rule.rule_id === result.rule_id) : null) ||
+    (result.name ? rules.find((rule) => rule.name === result.name) : null);
 
   if (!matchedRule) {
     return result;
@@ -452,54 +438,6 @@ function getSemanticPrimary(text, selectedContext) {
   };
 }
 
-function renderSemanticFallback(semanticPrimary, nearMisses = []) {
-  refs.resultRoot.innerHTML = `
-    <div class="result-card">
-      <div class="result-hero">
-        <div class="panel-kicker">语义近似匹配</div>
-        <h2 class="result-title">${escapeHtml(semanticPrimary.name ?? fallbackRule.name)}</h2>
-        <p class="result-copy">${escapeHtml(semanticPrimary.surface_meaning_template ?? fallbackRule.surface_meaning_template)}</p>
-        <div class="badge-row">
-          <span class="badge medium">近似度 ${formatPercent(semanticPrimary.semanticSimilarity)}</span>
-          <span class="badge">${escapeHtml(semanticPrimary.confidence_default ?? "medium")}</span>
-          <span class="badge low">${escapeHtml(state.selectedContext)}</span>
-        </div>
-      </div>
-
-      <div class="hint-block">
-        <strong>说明</strong>
-        这句话没有精确命中现有规则，以下分析基于最接近的语义规则生成，适合作为参考而不是最终定论。
-      </div>
-
-      <div class="result-grid">
-        <div class="info-panel">
-          <div class="info-title">隐含结构</div>
-          <div class="panel-copy">${escapeHtml(semanticPrimary.hidden_structure_template ?? fallbackRule.hidden_structure_template)}</div>
-        </div>
-
-        <div class="info-panel">
-          <div class="info-title">可能影响</div>
-          <div class="panel-copy">${escapeHtml(semanticPrimary.impact_template ?? fallbackRule.impact_template)}</div>
-        </div>
-      </div>
-
-      <div class="result-grid">
-        <div class="info-panel">
-          <div class="info-title">你可以这样回</div>
-          <div class="panel-copy"><strong>温和版：</strong>${escapeHtml(semanticPrimary.gentle_response ?? fallbackRule.gentle_response ?? "")}</div>
-          <div class="panel-copy"><strong>边界版：</strong>${escapeHtml(semanticPrimary.boundary_response ?? fallbackRule.boundary_response ?? "")}</div>
-          <div class="panel-copy"><strong>反问版：</strong>${escapeHtml(semanticPrimary.question_response ?? fallbackRule.question_response ?? "")}</div>
-        </div>
-
-        <div class="info-panel">
-          <div class="info-title">接近的方向</div>
-          <div class="panel-copy">${escapeHtml(nearMisses.map((item) => item.name).join("、") || semanticPrimary.name || "暂无")}</div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 function getNearMisses(text, selectedContext) {
   if (!String(text ?? "").trim()) {
     return [];
@@ -522,12 +460,67 @@ function getNearMisses(text, selectedContext) {
       return {
         ...partial,
         partialScore:
-          partial.matchedSlotCount * 2 + partial.weightedSlotScore - partial.missingRequiredCount + contextBoost
+          partial.matchedSlotCount * 2 +
+          partial.weightedSlotScore -
+          partial.missingRequiredCount +
+          contextBoost
       };
     })
     .filter(Boolean)
     .sort((a, b) => b.partialScore - a.partialScore)
     .slice(0, 2);
+}
+
+function renderApproxRuleCard(rule, sourceLabel, score, nearMisses = []) {
+  refs.resultRoot.innerHTML = `
+    <div class="result-card">
+      <div class="result-hero">
+        <div class="panel-kicker">${escapeHtml(sourceLabel)}</div>
+        <h2 class="result-title">${escapeHtml(rule.name ?? fallbackRule.name)}</h2>
+        <p class="result-copy">${escapeHtml(rule.surface_meaning_template ?? fallbackRule.surface_meaning_template)}</p>
+        <div class="badge-row">
+          ${
+            typeof score === "number"
+              ? `<span class="badge medium">近似度 ${formatPercent(score)}</span>`
+              : `<span class="badge medium">规则近似</span>`
+          }
+          <span class="badge">${escapeHtml(rule.confidence_default ?? "medium")}</span>
+          <span class="badge low">${escapeHtml(state.selectedContext)}</span>
+        </div>
+      </div>
+
+      <div class="hint-block">
+        <strong>说明</strong>
+        这句话没有精确命中现有规则，以下分析基于最接近的候选规则生成，适合作为参考。
+      </div>
+
+      <div class="result-grid">
+        <div class="info-panel">
+          <div class="info-title">隐含结构</div>
+          <div class="panel-copy">${escapeHtml(rule.hidden_structure_template ?? fallbackRule.hidden_structure_template)}</div>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-title">可能影响</div>
+          <div class="panel-copy">${escapeHtml(rule.impact_template ?? fallbackRule.impact_template)}</div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="info-panel">
+          <div class="info-title">你可以这样回</div>
+          <div class="panel-copy"><strong>温和版：</strong>${escapeHtml(rule.gentle_response ?? fallbackRule.gentle_response ?? "")}</div>
+          <div class="panel-copy"><strong>边界版：</strong>${escapeHtml(rule.boundary_response ?? fallbackRule.boundary_response ?? "")}</div>
+          <div class="panel-copy"><strong>反问版：</strong>${escapeHtml(rule.question_response ?? fallbackRule.question_response ?? "")}</div>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-title">接近的方向</div>
+          <div class="panel-copy">${escapeHtml(nearMisses.map((item) => item.name).join("、") || rule.name || "暂无")}</div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderContextButtons() {
@@ -586,7 +579,22 @@ function renderFallback(analysis) {
 
   const semanticPrimary = getSemanticPrimary(state.input, state.selectedContext);
   if (semanticPrimary) {
-    renderSemanticFallback(semanticPrimary, nearMisses);
+    renderApproxRuleCard(
+      semanticPrimary,
+      "语义近似匹配",
+      semanticPrimary.semanticSimilarity,
+      nearMisses
+    );
+    return;
+  }
+
+  if (nearMisses.length > 0) {
+    renderApproxRuleCard(
+      nearMisses[0],
+      "接近的方向",
+      null,
+      nearMisses
+    );
     return;
   }
 
@@ -608,11 +616,6 @@ function renderFallback(analysis) {
           <div class="info-title">可以怎么继续判断</div>
           <div class="panel-copy">看看它是不是在要求你更顺从、缩小自己、放弃发展，或者把责任更多推回女性身上。</div>
         </div>
-      </div>
-
-      <div class="hint-block">
-        <strong>最接近的方向</strong>
-        <div class="mt-2">${nearMisses.map((item) => escapeHtml(item.name)).join("、") || "暂无"}</div>
       </div>
 
       ${useSemanticAssist ? renderSemanticAssist(state.input, state.selectedContext) : ""}
@@ -707,6 +710,7 @@ function bindEvents() {
 
   refs.clearButton.addEventListener("click", () => {
     setInput("");
+    resetSemanticAssist();
     renderEmptyState();
     refs.userInput.focus();
   });
