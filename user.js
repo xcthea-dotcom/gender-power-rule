@@ -398,6 +398,108 @@ function formatPercent(value) {
   return `${Math.round(Number(value || 0) * 100)}%`;
 }
 
+function resolveSemanticRule(result) {
+  if (!result) {
+    return null;
+  }
+
+  const matchedRule =
+    (result.rule_id ? rules.find((rule) => rule.rule_id === result.rule_id) : null)
+    || (result.name ? rules.find((rule) => rule.name === result.name) : null);
+
+  if (!matchedRule) {
+    return result;
+  }
+
+  return {
+    ...matchedRule,
+    ...result,
+    rule_id: result.rule_id ?? matchedRule.rule_id,
+    name: result.name ?? matchedRule.name,
+    labels: result.labels ?? matchedRule.labels ?? [],
+    confidence_default: result.confidence_default ?? matchedRule.confidence_default,
+    severity_default: result.severity_default ?? matchedRule.severity_default,
+    surface_meaning_template: result.surface_meaning_template ?? matchedRule.surface_meaning_template,
+    hidden_structure_template: result.hidden_structure_template ?? matchedRule.hidden_structure_template,
+    impact_template: result.impact_template ?? matchedRule.impact_template,
+    gentle_response: result.gentle_response ?? matchedRule.gentle_response,
+    boundary_response: result.boundary_response ?? matchedRule.boundary_response,
+    question_response: result.question_response ?? matchedRule.question_response
+  };
+}
+
+function getSemanticPrimary(text, selectedContext) {
+  const key = getSemanticAssistKey(text, selectedContext);
+
+  if (state.semanticAssist.key !== key || state.semanticAssist.status !== "ready") {
+    return null;
+  }
+
+  if (!state.semanticAssist.results.length) {
+    return null;
+  }
+
+  const primary = resolveSemanticRule(state.semanticAssist.results[0]);
+
+  if (!primary) {
+    return null;
+  }
+
+  return {
+    ...primary,
+    semanticSource: true,
+    semanticSimilarity: Number(primary.semanticSimilarity || 0)
+  };
+}
+
+function renderSemanticFallback(semanticPrimary, nearMisses = []) {
+  refs.resultRoot.innerHTML = `
+    <div class="result-card">
+      <div class="result-hero">
+        <div class="panel-kicker">语义近似匹配</div>
+        <h2 class="result-title">${escapeHtml(semanticPrimary.name ?? fallbackRule.name)}</h2>
+        <p class="result-copy">${escapeHtml(semanticPrimary.surface_meaning_template ?? fallbackRule.surface_meaning_template)}</p>
+        <div class="badge-row">
+          <span class="badge medium">近似度 ${formatPercent(semanticPrimary.semanticSimilarity)}</span>
+          <span class="badge">${escapeHtml(semanticPrimary.confidence_default ?? "medium")}</span>
+          <span class="badge low">${escapeHtml(state.selectedContext)}</span>
+        </div>
+      </div>
+
+      <div class="hint-block">
+        <strong>说明</strong>
+        这句话没有精确命中现有规则，以下分析基于最接近的语义规则生成，适合作为参考而不是最终定论。
+      </div>
+
+      <div class="result-grid">
+        <div class="info-panel">
+          <div class="info-title">隐含结构</div>
+          <div class="panel-copy">${escapeHtml(semanticPrimary.hidden_structure_template ?? fallbackRule.hidden_structure_template)}</div>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-title">可能影响</div>
+          <div class="panel-copy">${escapeHtml(semanticPrimary.impact_template ?? fallbackRule.impact_template)}</div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="info-panel">
+          <div class="info-title">你可以这样回</div>
+          <div class="panel-copy"><strong>温和版：</strong>${escapeHtml(semanticPrimary.gentle_response ?? fallbackRule.gentle_response ?? "")}</div>
+          <div class="panel-copy"><strong>边界版：</strong>${escapeHtml(semanticPrimary.boundary_response ?? fallbackRule.boundary_response ?? "")}</div>
+          <div class="panel-copy"><strong>反问版：</strong>${escapeHtml(semanticPrimary.question_response ?? fallbackRule.question_response ?? "")}</div>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-title">接近的方向</div>
+          <div class="panel-copy">${escapeHtml(nearMisses.map((item) => item.name).join("、") || semanticPrimary.name || "暂无")}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function getNearMisses(text, selectedContext) {
   if (!String(text ?? "").trim()) {
     return [];
@@ -480,6 +582,12 @@ function renderFallback(analysis) {
 
   if (useSemanticAssist) {
     requestSemanticAssist(state.input, state.selectedContext);
+  }
+
+  const semanticPrimary = getSemanticPrimary(state.input, state.selectedContext);
+  if (semanticPrimary) {
+    renderSemanticFallback(semanticPrimary, nearMisses);
+    return;
   }
 
   refs.resultRoot.innerHTML = `
