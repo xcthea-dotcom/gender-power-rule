@@ -284,10 +284,10 @@ function findKeywordMatch(normalizedText, keyword) {
     return { keyword, matchedText: matchedAlias, mode: "alias", similarity: 1 };
   }
 
-  if (normalizedKeyword.length >= 4) {
+  if (normalizedKeyword.length >= 6) {
     const parts = normalizedKeyword.match(/.{1,2}/g) ?? [];
     const longParts = parts.filter((part) => part.length >= 2);
-    if (longParts.length >= 2 && longParts.every((part) => normalizedText.includes(part))) {
+    if (longParts.length >= 3 && longParts.every((part) => normalizedText.includes(part))) {
       return { keyword, matchedText: keyword, mode: "fragment", similarity: 0.66 };
     }
   }

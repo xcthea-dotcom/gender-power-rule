@@ -183,6 +183,8 @@ body::before {
 }
 
 .context-pill,
+.context-chip,
+.example-pill,
 .chip-button,
 .badge,
 .response-tag {
@@ -214,6 +216,8 @@ body::before {
   gap: 10px;
 }
 
+.context-chip,
+.example-pill,
 .chip-button {
   border: 1px solid rgba(57, 41, 30, 0.12);
   background: rgba(255, 255, 255, 0.78);
@@ -235,6 +239,10 @@ body::before {
     box-shadow 140ms ease;
 }
 
+.context-chip:hover,
+.context-chip:focus-visible,
+.example-pill:hover,
+.example-pill:focus-visible,
 .chip-button:hover,
 .chip-button:focus-visible,
 .ghost-button:hover,
@@ -244,6 +252,10 @@ body::before {
   transform: translateY(-1px);
 }
 
+.context-chip:hover,
+.context-chip:focus-visible,
+.example-pill:hover,
+.example-pill:focus-visible,
 .chip-button:hover,
 .chip-button:focus-visible {
   border-color: rgba(57, 41, 30, 0.24);
@@ -252,6 +264,7 @@ body::before {
     0 12px 24px rgba(41, 26, 17, 0.08);
 }
 
+.context-chip.is-active,
 .chip-button.is-active {
   background: var(--ink);
   color: #fffdfa;
@@ -261,16 +274,19 @@ body::before {
     0 14px 28px rgba(26, 23, 21, 0.16);
 }
 
+.example-pill,
 .chip-button.is-example {
   background: rgba(143, 47, 27, 0.06);
   border-color: rgba(143, 47, 27, 0.12);
 }
 
+.context-row .context-chip,
 .context-row .chip-button {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(250, 244, 235, 0.88));
 }
 
+.example-list .example-pill,
 .example-list .chip-button {
   justify-content: flex-start;
   text-align: left;
