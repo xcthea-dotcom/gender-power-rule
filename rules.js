@@ -1340,8 +1340,8 @@ window.ruleDemoData = {
     R023: [
       ["女人", "女生", "女的"],
       ["麻烦", "事多", "矫情", "难搞", "爱作"],
-      ["天生", "本来","都", "就是"],
-      ["一群女的"]
+      ["天生", "本来"],
+      ["都", "就是"]
     ],
     R024: [
       ["女人", "女生", "女孩", "老婆", "妻子"],
@@ -1584,7 +1584,7 @@ window.ruleDemoData = {
     R021: { requiredIndexes: [2], weightMap: { 0: 1, 1: 1, 2: 3, 3: 1 } },
     R022: { requiredIndexes: [0, 1], weightMap: { 0: 3, 1: 2, 2: 1, 3: 1 } },
     R023: { requiredIndexes: [0, 1], weightMap: { 0: 3, 1: 3, 2: 1, 3: 1 } },
-    R024: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
+    R024: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 2 } },
     R025: { requiredIndexes: [0, 1], weightMap: { 0: 3, 1: 2, 2: 1, 3: 1 } },
     R026: { requiredIndexes: [0, 1], weightMap: { 0: 3, 1: 3, 2: 1, 3: 1 } },
     R027: { requiredIndexes: [0], weightMap: { 0: 4, 1: 1, 2: 2, 3: 1 } },
