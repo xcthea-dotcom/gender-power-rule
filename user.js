@@ -468,15 +468,29 @@ function getNearMisses(text, selectedContext) {
         ...partial,
         ...signals,
         partialScore:
-          signals.matchedRequiredSlotCount * 3 +
-          signals.meaningfulSlotCount * 2 +
-          signals.meaningfulWeightScore -
+          partial.matchedSlotCount * 2 +
+          partial.weightedSlotScore -
           partial.missingRequiredCount +
           contextBoost
       };
     })
     .filter(Boolean)
-    .sort((a, b) => b.partialScore - a.partialScore)
+    .sort((a, b) => {
+      const scoreDiff = (b.partialScore ?? 0) - (a.partialScore ?? 0);
+      if (Math.abs(scoreDiff) > 1) {
+        return scoreDiff;
+      }
+      if ((b.matchedRequiredSlotCount ?? 0) !== (a.matchedRequiredSlotCount ?? 0)) {
+        return (b.matchedRequiredSlotCount ?? 0) - (a.matchedRequiredSlotCount ?? 0);
+      }
+      if ((b.meaningfulSlotCount ?? 0) !== (a.meaningfulSlotCount ?? 0)) {
+        return (b.meaningfulSlotCount ?? 0) - (a.meaningfulSlotCount ?? 0);
+      }
+      if ((b.meaningfulWeightScore ?? 0) !== (a.meaningfulWeightScore ?? 0)) {
+        return (b.meaningfulWeightScore ?? 0) - (a.meaningfulWeightScore ?? 0);
+      }
+      return (b.priority ?? 0) - (a.priority ?? 0);
+    })
     .slice(0, 2);
 }
 
@@ -599,6 +613,10 @@ function buildAnalysisPages(analysis) {
   }
 
   nearMisses.forEach((candidate) => {
+    if (!pages.length) {
+      return;
+    }
+
     if (pages.length >= 2) {
       return;
     }
