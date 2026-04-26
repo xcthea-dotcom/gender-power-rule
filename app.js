@@ -15,6 +15,14 @@ const fallbackRuleId = "R030";
 const semanticEndpoint = "/api/semantic-assist";
 const semanticTimeoutMs = 12000;
 const localDraftsKey = "gender-rule-demo-local-drafts-v4";
+const weakNearMissWords = new Set([
+  "太", "很", "了", "吧", "吗", "呢",
+  "要", "该", "得", "应该", "还是要",
+  "别", "不要", "不能",
+  "就", "就是", "本来", "本来就", "都", "又", "更",
+  "这么", "那么", "这样", "那样",
+  "一个", "一下", "一点"
+]);
 
 const state = {
   input: examples?.[0] ?? "",
@@ -381,6 +389,39 @@ function matchRule(text, rule, options = {}) {
   };
 }
 
+function getNearMissSignals(partial) {
+  const slotHits = partial?.slotHits ?? [];
+  let matchedRequiredSlotCount = 0;
+  let meaningfulSlotCount = 0;
+  let meaningfulWeightScore = 0;
+
+  slotHits.forEach((slot) => {
+    if (!slot.matches?.length) {
+      return;
+    }
+
+    if (slot.required) {
+      matchedRequiredSlotCount += 1;
+    }
+
+    const hasMeaningfulMatch = slot.matches.some((match) => {
+      const word = String(match.keyword ?? "").trim();
+      return word.length >= 2 && !weakNearMissWords.has(word);
+    });
+
+    if (hasMeaningfulMatch) {
+      meaningfulSlotCount += 1;
+      meaningfulWeightScore += slot.weight ?? 1;
+    }
+  });
+
+  return {
+    matchedRequiredSlotCount,
+    meaningfulSlotCount,
+    meaningfulWeightScore
+  };
+}
+
 function analyzeText(text, selectedContext) {
   if (!String(text ?? "").trim()) {
     return null;
@@ -600,12 +641,15 @@ function getNearMisses(text, selectedContext) {
         selectedContext && selectedContext !== "不限" && supportedContexts.includes(selectedContext)
           ? 2
           : 0;
+      const signals = getNearMissSignals(partial);
 
       return {
         ...partial,
+        ...signals,
         partialScore:
-          partial.matchedSlotCount * 2 +
-          partial.weightedSlotScore -
+          signals.matchedRequiredSlotCount * 3 +
+          signals.meaningfulSlotCount * 2 +
+          signals.meaningfulWeightScore -
           partial.missingRequiredCount +
           contextBoost
       };
