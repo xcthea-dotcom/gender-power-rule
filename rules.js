@@ -1302,10 +1302,11 @@ window.ruleDemoData = {
       ["稳重点", "顾家", "重心", "为孩子"]
     ],
     R017: [
-      ["女强人"],
+      ["女生", "女孩", "女人"],
+      ["女强人","事业", "太强", "太能干", "强势","能力强","野心"]
       ["不幸福", "没人要", "婚姻不好", "家庭不幸福"],
       ["婚姻", "家庭", "感情", "对象"],
-      ["事业", "太强", "太能干", "强势","能力强"]
+      
     ],
     R018: [
       ["老婆", "女友", "妻子", "对象"],
@@ -1577,7 +1578,7 @@ window.ruleDemoData = {
     R014: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
     R015: { requiredIndexes: [2], weightMap: { 0: 1, 1: 1, 2: 3, 3: 1 } },
     R016: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
-    R017: { requiredIndexes: [0, 1], weightMap: { 0: 3, 1: 3, 2: 1, 3: 1 } },
+    R017: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
     R018: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
     R019: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
     R020: { requiredIndexes: [0, 1], weightMap: { 0: 2, 1: 3, 2: 1, 3: 1 } },
