@@ -135,7 +135,7 @@ window.ruleDemoData = {
     },
     {
       "rule_id": "R008",
-    "name": "太敏感了",
+    "name": "太敏感/矫情了",
       "must_include_any": ["太敏感", "想太多", "太情绪化", "玻璃心", "小题大做", "脾气差","矫情"],
       "must_include_any_2": [],
       "exclude_any": [],
