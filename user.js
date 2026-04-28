@@ -294,9 +294,7 @@ function analyzeText(text, selectedContext) {
 }
 
 function shouldUseSemanticAssist(analysis) {
-  const primary = analysis?.primary ?? fallbackRule;
-  const topScore = analysis?.topMatches?.[0]?.totalScore ?? primary?.totalScore ?? primary?.score ?? 0;
-  return primary?.rule_id === fallbackRuleId || topScore < 8;
+  return true;
 }
 
 function resetSemanticAssist() {
@@ -561,6 +559,24 @@ function buildAnalysisPages(analysis) {
     });
   }
 
+  const secondMatched = topMatches.find((item) => item.rule_id !== result.rule_id && item.rule_id !== fallbackRuleId);
+
+  if (pages.length < 2 && secondMatched) {
+    pushPage({
+      sourceLabel: "第二分析",
+      introTitle: "另一条也比较接近的规则命中",
+      introCopy: "它同样是规则层面接得住的解释，只是优先度低于当前主命中。",
+      rule: secondMatched,
+      badges: [
+        { label: `分数 ${secondMatched.totalScore ?? secondMatched.score ?? 0}`, tone: "medium" },
+        { label: secondMatched.confidence_default ?? "low" },
+        { label: state.selectedContext, tone: "low" }
+      ],
+      supportTitle: "命中词",
+      supportCopy: secondMatched.hitWords?.slice(0, 8).join("、") || "无"
+    });
+  }
+
   semanticCandidates.forEach((candidate) => {
     if (pages.length >= 2) {
       return;
@@ -580,23 +596,6 @@ function buildAnalysisPages(analysis) {
       supportCopy: "来自服务端语义辅助返回的候选规则。"
     });
   });
-
-  const secondMatched = topMatches.find((item) => item.rule_id !== result.rule_id && item.rule_id !== fallbackRuleId);
-  if (pages.length < 2 && secondMatched) {
-    pushPage({
-      sourceLabel: "第二分析",
-      introTitle: "另一条也比较接近的规则命中",
-      introCopy: "它同样是规则层面接得住的解释，只是优先度低于当前主命中。",
-      rule: secondMatched,
-      badges: [
-        { label: `分数 ${secondMatched.totalScore ?? secondMatched.score ?? 0}`, tone: "medium" },
-        { label: secondMatched.confidence_default ?? "low" },
-        { label: state.selectedContext, tone: "low" }
-      ],
-      supportTitle: "命中词",
-      supportCopy: secondMatched.hitWords?.slice(0, 8).join("、") || "无"
-    });
-  }
 
   nearMisses.forEach((candidate) => {
     if (!pages.length) {
