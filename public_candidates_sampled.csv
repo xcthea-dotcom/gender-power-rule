@@ -1,0 +1,121 @@
+﻿id,sentence,source_dataset,source_file,original_label,original_category,gold_category_suggested,gold_rule_id_suggested,difficulty_suggested,candidate_type,reason_for_mapping,needs_manual_review
+pub-50191,真正聪明的女人应该是利用男人，欺骗男人，占男人便宜，如果和男人吵架，那就是笨的女人,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C1,R001,semi_implicit,biased,matched 笨,False
+pub-56052,她是那么弱小，他一定很粗蠢，一定会欺负她,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C1,R001,semi_implicit,biased,matched 蠢,False
+pub-90431,通常，她们只是满脑子想着找个男人，当然，是想找爱她们的男人,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,AC|ANB,C1,R001,semi_implicit,biased,matched 脑子,False
+pub-46019,她看不出这个题目蠢在哪里，她的智力刚开窍，还没有得到发展,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC|DI,C1,R001,semi_implicit,biased,matched 蠢,False
+pub-49302,文笔一般，没有内涵，没有逻辑，一篇真正矫情做作的伪文艺女青年随笔,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C1,R002,semi_implicit,biased,matched 逻辑、矫情,False
+pub-51669,她并不适合担当一个伟大的文学沙龙的女主人，这使得他感到非常痛苦,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C1,R002,direct,biased,matched 不适合,False
+pub-46375,姚太太对女儿说：“这位‘标准美人’看上来顶伶俐的，怎么竟是个笨蛋，听音乐嫌闹,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC|DI,C1,R001,semi_implicit,biased,matched 笨,False
+pub-55693,他虽然口头上也主张解决妇女问题，但心底里却认为女人都是愚蠢的，猥琐的，除了他所热恋的女人之外，譬如他现在所爱的格拉别茨,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C1,R001,semi_implicit,biased,matched 蠢、愚蠢,False
+pub-51583,尽管伊秋说起话来有点笨嘴拙舌，体态也显得臃肿蠢钝，但是她却长了一张俊美的脸孔，一双最为温顺的羚羊式的大眼睛，乌黑的眉毛又粗又长,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C1,R001,semi_implicit,biased,matched 笨、蠢,False
+pub-47297,脑子里想的是如何大做生意,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C1,R001,contextual,biased,matched 脑子; trimmed for standalone sample,True
+pub-53460,她听见放音机在呼号着一种矫揉造作的娇媚蠢笨的声音,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C1,R001,contextual,biased,matched 笨、蠢; trimmed for standalone sample,True
+pub-55834,结果也就变得越发愚蠢,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C1,R001,contextual,biased,matched 蠢、愚蠢; trimmed for standalone sample,True
+pub-91066,特别是对于女性来说，教师职业规律性强，有固定假期，既工作稳定、待遇好，且能够照顾家庭，是一份难得的理想职业,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,AC|ANB,C2,R004,semi_implicit,biased,matched 顾家、照顾、照顾家庭,False
+pub-02349,对，这种女人必须依靠男人的思想本来就是男权产物,SWSR,vendor/SWSR/SexComment.csv,1,MA,C2,R062,direct,biased,matched 靠男人; taxonomy v3 aligns R062 to C2,False
+pub-02610,图二女孩子亲自出来解释她也经常给男朋友买东西被骂白嫖,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C2,R062,semi_implicit,biased,matched 白嫖; taxonomy v3 aligns R062 to C2,False
+pub-01525,大把低端岗位 体力劳动 重复性工作 不需要学历和文化 有条命能动弹就行 我劝你早点从你的女人靠男人养的梦里醒来，谢谢,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C2,R062,direct,biased,matched 体力; taxonomy v3 aligns R062 to C2,False
+pub-01913,第三，学艺术这一点见仁见智，不否认有这类家长为了女儿嫁得好而学，梦想成为艺术家另说,SWSR,vendor/SWSR/SexComment.csv,1,MA,C2,R004,semi_implicit,biased,matched 嫁得好,False
+pub-01829,女性就像被男性圈养的家禽，只要把你保护好，你就好好听话生育，照顾家庭，让男性泄欲就好,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C2,R004,semi_implicit,biased,matched 顾家、照顾、照顾家庭,False
+pub-02721,比如说，男主外，女主内，这相当于压制了一半的社会生产力，那么这个时候就会进行改革，让妇女也出来工作,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C2,R004,semi_implicit,biased,matched 男主外、女主内,False
+pub-04053,只是要强，并非强势，传统的家庭模式也必将慢慢减少，男主外女主内只是分工，贤妻良母等角色也并非固定不变,SWSR,vendor/SWSR/SexComment.csv,1,MA,C2,R004,semi_implicit,biased,matched 男主外、女主内,False
+pub-03398,有的已婚女性觉得自己过的很幸福家庭很好老公很好，有的单身女性觉得自己不结婚这事儿就跟自己没关系了,SWSR,vendor/SWSR/SexComment.csv,1,MA,C2,R004,semi_implicit,biased,matched 好老公,False
+pub-01523,我真是笑死 农村妇女靠男人养,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C2,R062,direct,biased,matched 靠男人; taxonomy v3 aligns R062 to C2,False
+pub-37859,女人以为自己在白嫖，其实自己是在被垄断，哈哈哈哈哈,COLDataset-gender,vendor/COLDataset/train.csv,1,,C2,R062,semi_implicit,biased,matched 白嫖; taxonomy v3 aligns R062 to C2,False
+pub-53095,这些年轻妇女，抛头露面惯了，行动言语之间，自然开通得多,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C3,R005,semi_implicit,biased,matched 抛头露面,False
+pub-02264,就像事业成功男人不喜欢找女强人当老婆,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C3,R005,semi_implicit,biased,matched 女强人,False
+pub-01261,就跟一天天叫嚣着“范冰冰和杨幂这种女人在我们村都没人要的”是同样的道理,SWSR,vendor/SWSR/SexComment.csv,1,MA,C3,R005,semi_implicit,biased,matched 没人要,False
+pub-00458,那么多光棍急得跟狗一样恨不得只要性别女就能娶回家，都找不到老婆/女友，也不知道是谁没人要，主动权在谁手里都搞不清,SWSR,vendor/SWSR/SexComment.csv,1,MA,C3,R005,semi_implicit,biased,matched 没人要,False
+pub-44177,你们这些女人，别抛头露面了好吗,COLDataset-gender,vendor/COLDataset/train.csv,1,,C3,R005,semi_implicit,biased,matched 抛头露面,False
+pub-37749,先说是不是，就我周围的环境，哪怕女孩家条件好的够她吃一辈子，她都肯定是不可能全职的,COLDataset-gender,vendor/COLDataset/train.csv,1,,C3,R005,contextual,biased,matched 女孩家,True
+pub-04612,普叔，以后不要被女人漂亮的脸蛋骗了,SWSR,vendor/SWSR/SexComment.csv,1,SA,C4,R011,semi_implicit,biased,matched 漂亮,False
+pub-07936,长得丑，又没钱，还有老婆，对女孩子做这些事的话，当然是犯罪,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C4,R011,semi_implicit,biased,matched 丑,False
+pub-04346,而女性作为比较细瘦的一方，凭什么要跟你相处的在一块绷着,SWSR,vendor/SWSR/SexComment.csv,1,MA,C4,R011,semi_implicit,biased,matched 瘦,False
+pub-04961,中国女性化妆就是爱慕虚荣，不化妆就是被生活磨平了棱角连美都不要了,SWSR,vendor/SWSR/SexComment.csv,1,MA,C4,R011,semi_implicit,biased,matched 化妆,False
+pub-00784,你看到她们因为颜值焦虑痛苦的不行，然后你说：其实根本没必要有颜值焦虑，颜值这回事是这样这样这样,SWSR,vendor/SWSR/SexComment.csv,1,SA,C4,R011,semi_implicit,biased,matched 颜值,False
+pub-06957,一见到女人，不管好坏，美丑,SWSR,vendor/SWSR/SexComment.csv,1,SO,C4,R011,semi_implicit,biased,matched 丑,False
+pub-07814,可是我女朋友漂亮，意思争不过就骂呗，你这是丢中国女性的脸，还让女人怎么站起来，为了钱也不能不要脸啊，几毛钱一条，来支付宝打过来,SWSR,vendor/SWSR/SexComment.csv,1,MA,C4,R011,semi_implicit,biased,matched 漂亮,False
+pub-39757,如果她颜值低，危险时你不会想到她,COLDataset-gender,vendor/COLDataset/train.csv,1,,C4,R011,semi_implicit,biased,matched 颜值,False
+pub-35701,张无忌他妈说：越漂亮的女人越会骗人,COLDataset-gender,vendor/COLDataset/train.csv,1,,C4,R011,semi_implicit,biased,matched 漂亮,False
+pub-36662,殷素素说过～越是漂亮的女人越会骗人,COLDataset-gender,vendor/COLDataset/train.csv,1,,C4,R011,semi_implicit,biased,matched 漂亮,False
+pub-39756,如果你女友颜值高，你遇到危险会想到她,COLDataset-gender,vendor/COLDataset/train.csv,1,,C4,R011,semi_implicit,biased,matched 颜值,False
+pub-55047,"而对嫔妃来说,最实际的是生育,没生孩子的想生孩子,生了女儿的想生儿子,生了儿子的还想再生儿子",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C5,R013,semi_implicit,biased,matched 生孩子、生育,False
+pub-49217,女朋友不打算生孩子，这婚还结不结,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C5,R013,semi_implicit,biased,matched 生孩子,False
+pub-48264,关键是当妈妈了，自己做事不认真，将来怎么好意思管孩子,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C5,R013,semi_implicit,biased,matched 当妈,False
+pub-49377,在司法实践中，我遇到的比较多的受害人是大龄单身女青年，背负着家庭和社会催婚的压力,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C5,R013,semi_implicit,biased,matched 催婚,False
+pub-49130,古代不是每个剩女都最终能有个好归宿,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C5,R013,contextual,biased,matched 剩女,True
+pub-07680,有的，还有那种单身的时候骂结婚女孩子都是婚驴，结婚后又骂单身妹妹嫁不出去没人要，大把这种人，恶心坏了,SWSR,vendor/SWSR/SexComment.csv,1,MA,C5,R013,direct,biased,matched 嫁不出去、婚驴,False
+pub-04312,然后普遍还说不结婚是嫁不出去、剩女,SWSR,vendor/SWSR/SexComment.csv,1,MA,C5,R013,direct,biased,matched 剩女、嫁不出去,False
+pub-02702,我觉得说剩女和说驴都有病这冲突吗,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C5,R013,semi_implicit,biased,matched 剩女,False
+pub-06344,目前就剩婚驴了，有点不想团结她们咋办,SWSR,vendor/SWSR/SexComment.csv,1,MA,C5,R013,semi_implicit,biased,matched 婚驴,False
+pub-03980,我就是不婚驴子本驴，她们是婚姻公主啦,SWSR,vendor/SWSR/SexComment.csv,1,MA,C5,R013,semi_implicit,biased,matched 婚驴,False
+pub-05075,"”,又来了，当初骂剩女的时候没人说有病哦",SWSR,vendor/SWSR/SexComment.csv,1,MA,C5,R013,semi_implicit,biased,matched 剩女,False
+pub-52565,这浮舟看上去是何等温婉拥静，孰料亦是个水性杨花的女子，与匈亲王倒蛮般配的,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 水性杨花,False
+pub-54142,军，我敢用我的灵魂打赌她是贞洁的,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 贞洁,False
+pub-51966,处女的理想，和少妇的现实，总是矛盾的,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C6,R014,semi_implicit,biased,matched 处女,False
+pub-54168,她犯了错误，但是我们记得，她的本质是贞洁贤淑的,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 贞洁,False
+pub-55766,可是她的父母亲，当然罗，还坚信自己女儿的率真和贞洁哩,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C6,R014,semi_implicit,biased,matched 贞洁,False
+pub-91123,网络舆论的关注点，除施暴者手段残忍外，还有受害女子是否出轨,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 出轨,False
+pub-48013,"在日本,很多女性将被性侵看作一种耻辱,谁又会把“耻辱”公之于众呢",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C6,R014,semi_implicit,biased,matched 性侵、性侵,False
+pub-49933,如果她没有“恋父情结”，她会觉得你怪怪的，你这个老头子骚扰我，对不对,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 骚扰,False
+pub-56040,也许是因为她的脸儿透着处女的娇艳，正好和她言谈举止的质朴动人相称,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,DI|ANB,C6,R014,semi_implicit,biased,matched 处女,False
+pub-48673,"小文在文章中叙述,事发后,她无数次想起被骚扰的过程,哭泣、无法入睡,甚至想过自杀",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C6,R014,semi_implicit,biased,matched 骚扰,False
+pub-91230,"据透露,添加某副教授微信的多名女生,都受到了言语骚扰,举报人则进一步受到生理侵害",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 骚扰,False
+pub-31088,那就是女的自作自受，男的被搞臭也是活该,COLDataset-gender,vendor/COLDataset/dev.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-44126,旁观者女人是可怜之人必有可恨处自己活该,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-37849,生育建立在伤害女人的身体血肉上.那女的活该了是吗,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 生育; taxonomy v3 aligns R020 to C7,False
+pub-36447,那我就劝所有男性同胞不要做接盘侠，这种女人活该，自作自受,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-31396,感觉这些被骗的渣女真的活该，优质男会喜欢她们那些屌丝女,COLDataset-gender,vendor/COLDataset/dev.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-40963,所以女性就别生孩子了，谁爱生谁生去，反正生孩子不能就业就活该,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 生孩子; taxonomy v3 aligns R020 to C7,False
+pub-36110,她被男人抛弃为什么不杀男人，反而要杀正妻，觉得她被抛弃是活该,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-33091,那也不代表三观可以不正，至少我觉得那是对女性的侮辱，所以封了活该,COLDataset-gender,vendor/COLDataset/test.csv,1,2,C7,R020,direct,biased,matched 活该,False
+pub-33739,我能说觉得这女的活该吗，不喜欢为什么不直接拒绝，一次次的给别人幻想,COLDataset-gender,vendor/COLDataset/test.csv,1,1,C7,R020,direct,biased,matched 活该,False
+pub-42774,那那个男的就是性格比较恶劣，就是要她还东西，她白拿那么多东西也算是活该,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-42471,同为女人还为难女人何况是自己亲生的活该将来儿子没出息女儿远离她现在就能看出这女人将来得不了好,COLDataset-gender,vendor/COLDataset/train.csv,1,,C7,R020,direct,biased,matched 活该,False
+pub-90982,女人就是花，中看不中用,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,ANB,C8,R023,direct,biased,matched 女人就是,False
+pub-49210,女方家如索要高额彩礼，我只能去借去贷,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C8,R047,semi_implicit,biased,matched 彩礼; taxonomy v3 aligns R047 to C8,False
+pub-49648,因为这种心理，很多女孩结婚，都会相互攀比彩礼的多少,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C8,R047,semi_implicit,biased,matched 彩礼; taxonomy v3 aligns R047 to C8,False
+pub-55418,本身就是一个贫困户，出嫁女儿还不要彩礼，脑子有问题,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C8,R047,semi_implicit,biased,matched 脑子; taxonomy v3 aligns R047 to C8,False
+pub-55419,村民向记者介绍说，一方希望通过女儿出嫁索要高额彩礼来改变贫困的生活，而另一方也因娶媳妇欠下了更多的债务，令经济条件雪上加霜,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C8,R047,semi_implicit,biased,matched 彩礼; taxonomy v3 aligns R047 to C8,False
+pub-06505,这个有人讨论过，哇哇的学徒，属于比赤贫主妇有钱一点，但又比真捞女对男权更奴一点,SWSR,vendor/SWSR/SexComment.csv,1,MA,C8,R023,semi_implicit,biased,matched 捞女,False
+pub-01124,你们都好棒啊，我还是有厌女的思想,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C8,R023,semi_implicit,biased,matched 厌女,False
+pub-03592,厌女是男权社会特意培养的心理投射,SWSR,vendor/SWSR/SexComment.csv,1,MA,C8,R023,semi_implicit,biased,matched 厌女,False
+pub-06104,又来了，活体厌女，既然这样你和男人锁死吧,SWSR,vendor/SWSR/SexComment.csv,1,MA,C8,R023,semi_implicit,biased,matched 厌女,False
+pub-07597,女性厌女厌的驴子母伥，男人厌的全体女性,SWSR,vendor/SWSR/SexComment.csv,1,MA,C8,R023,semi_implicit,biased,matched 厌女,False
+pub-03205,“说你娘是厌女本身就很厌女”，到底谁厌女啊,SWSR,vendor/SWSR/SexComment.csv,1,SCB,C8,R023,semi_implicit,biased,matched 厌女,False
+pub-91191,比如说过去这个孩子，总归是跟男方姓的,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,ANB,C9,R051,semi_implicit,biased,matched 跟男方姓,False
+pub-02576,"大家少生儿子吧,男人多了只会祸害社会",SWSR,vendor/SWSR/SexComment.csv,1,MA,C9,R051,semi_implicit,biased,matched 生儿子,False
+pub-32641,說女人不能传宗接代猪狗不如，也就是说他爸他妈他奶奶都是猪狗,COLDataset-gender,vendor/COLDataset/dev.csv,1,,C9,R051,semi_implicit,biased,matched 传宗接代,False
+pub-41847,呵呵呵，他就是重男轻女，看不起女人,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-38857,重女轻男真的跟重男轻女一样恶心,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-40519,就为了顾全重男轻女就要选择姐姐,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-40177,真的是特别重男轻女到这样的程度,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-38920,明白了，你父亲这是重男轻女，直男癌,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-39994,强行乱吹，就是重男轻女，这还用讨论,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-39968,只能说可能家里重男轻女太压抑了,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-42227,重男轻女造成恶果的，是他们爸妈吧,COLDataset-gender,vendor/COLDataset/train.csv,1,,C9,R051,semi_implicit,biased,matched 重男轻女,False
+pub-42361,有位答主说，女主外，女主内，你挑一个，昆凌等人贤惠难道是冤大头,COLDataset-gender,vendor/COLDataset/train.csv,1,,C2,R004,semi_implicit,biased,matched 贤惠、女主内,False
+pub-49153,讲述了女主角童年遭受性侵以后一直难以走出噩梦的故事，属于对性侵儿童成长后的现状进行追踪，直视伤口并疗愈伤口,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C6,R014,semi_implicit,biased,matched 性侵、性侵,False
+pub-53747,这也可说是吉行淳之介文学的特点.即依靠感性而不是理性.《原色的街》女主人公绯实是通过自己的官能感受,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C1,R001,contextual,biased,matched 理性; trimmed for standalone sample,True
+pub-49097,从此前多起高校教师性骚扰女学生事件看，都是经媒体报道引发舆情后再处理，这多少也说明，有些高校在性骚扰防控上仍有不足,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,ANB,C6,R014,semi_implicit,biased,matched 骚扰、性骚扰,False
+pub-49128,各级教育行政部门也上下联动，正在落实预防性侵害未成年人的教育保护制度，落实校园性侵强制报告、女童宿舍封闭管理等制度,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC,C6,R014,semi_implicit,biased,matched 性侵、性侵,False
+pub-61014,见有人来，女人笑着抬起头，说，你们随便看,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-64758,我就羡慕人家老子对儿子儿子跟老子的随便态度,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-88329,"只要她不在家,这屋就成了我的天下,吃的用的随便拿",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-88463,何勤问了又问，她才抬起尖削秀气的脸来，勉强开言道：“随便怎么都成,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-80993,民警也给女孩子家长和老师嘱咐，对青春期的孩子一定要加强引导，耐心沟通，避免孩子情绪过度激动,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-76440,"当时,笔者正处于忙碌阶段,不想随便请假,就打了电话给朋友,试图请她过来与医生沟通,取消住院的决定",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-64365,离情人节还早的时候，提早在网上买好了鲜花，在家里用水养了几天，情人节那天自己随便包装了一下送给女友,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-68271,好在女儿平时锻炼多，身体还算结实,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-68230,"她当然是真打的,而且一点都不含糊",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-85607,我蹑手蹑脚地跟着母亲，心里打着鼓,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-58041,她的朋友圈开始转发卖手表的内容,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-91576,字里行间，这两个少女也都有意于烟,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/non-biased.json,non-biased,,C0,R030,neutral,neutral,no strong taxonomy cue,False
+pub-90990,书上说，女人应该戴头巾，穿罩袍，不应该抛头露面，更不能唱歌跳舞,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,ANB,C3,R005,semi_implicit,boundary,matched 抛头露面,True
+pub-80217,哪怕是很瘦的女孩子，都会被显得比较笨重,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C4,R011,neutral,boundary,matched 笨; taxonomy v3 aligns R011 to C4,True
+pub-49303,我不太愿意用“剩女”这个词，因为“剩”字有点贬义,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/biased.json,biased,AC|ANB,C5,R013,semi_implicit,boundary,matched 剩女,True
+pub-86631,婚事不但简办，而且，石振峰和家人一致同意，不要男方一分彩礼钱,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C8,R047,neutral,boundary,matched 彩礼; taxonomy v3 aligns R047 to C8,True
+pub-91037,还是出于传宗接代的需要向男性的下一代流动,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/valid/biased.json,biased,ANB,C9,R051,contextual,boundary,matched 传宗接代; trimmed for standalone sample,True
+pub-89519,"作为随军家属,她希望多花时间在照顾家庭上,所以更倾向于工作强度不大的岗位,“有正常的双休日、节假日”",NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C2,R004,neutral,boundary,matched 顾家、照顾、照顾家庭,True
+pub-69057,神色刚毅的阿思，是商界女强人，行事以果断见著,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C3,R005,neutral,boundary,matched 女强人,True
+pub-88860,抡得起扳手、带得了徒儿、懂得了管理，这个在2018年获得“甘肃省技术标兵”殊荣的女检修工，向我们证明了，什么叫“干得漂亮”,NLPCC-2025/CORGI-style,vendor/NLPCC-2025-Shared-Task-7/data/train/non-biased.json,non-biased,,C4,R011,neutral,boundary,matched 技术; taxonomy v3 aligns R011 to C4,True
