@@ -324,38 +324,56 @@ function requestSemanticAssist(text, selectedContext) {
     error: ""
   };
 
-  if (window.location?.protocol === "file:") {
-    state.semanticAssist = {
-      key,
-      status: "error",
-      results: [],
-      error: "当前是本地 file 页面，服务端语义辅助只有部署后才可用。"
-    };
-    return;
-  }
-
   window.clearTimeout(state.semanticAssistTimer);
   state.semanticAssistTimer = window.setTimeout(() => {
-    Promise.race([
-      fetch(semanticEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          text,
-          context: selectedContext,
-          topK: 3
-        })
-      }).then(async (response) => {
-        if (!response.ok) {
-          const payload = await response.json().catch(() => ({}));
-          throw new Error(payload?.error || `server ${response.status}`);
-        }
+    const localEmbeddingPromise =
+      window.embeddingHelper?.rankTextAgainstRules
+        ? window.embeddingHelper.rankTextAgainstRules(
+            text,
+            rules.filter((rule) => rule.rule_id !== fallbackRuleId),
+            { topK: 3 }
+          ).then((results) =>
+            results.map((rule) => ({
+              rule_id: rule.rule_id,
+              name: rule.name,
+              labels: rule.labels ?? [],
+              semanticSimilarity: rule.semanticSimilarity
+            }))
+          )
+        : Promise.reject(new Error("embedding unavailable"));
 
-        const payload = await response.json();
-        return payload?.results ?? [];
-      }),
+    const remoteSemanticPromise =
+      window.location?.protocol === "file:"
+        ? Promise.reject(new Error("semantic remote unavailable in file mode"))
+        : fetch(semanticEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              text,
+              context: selectedContext,
+              topK: 3
+            })
+          }).then(async (response) => {
+            if (!response.ok) {
+              const payload = await response.json().catch(() => ({}));
+              throw new Error(payload?.error || `server ${response.status}`);
+            }
+
+            const payload = await response.json();
+            return payload?.results ?? [];
+          });
+
+    Promise.race([
+      localEmbeddingPromise.catch(() =>
+        Promise.race([
+          remoteSemanticPromise,
+          new Promise((_, reject) => {
+            window.setTimeout(() => reject(new Error("semantic timeout")), semanticTimeoutMs);
+          })
+        ])
+      ),
       new Promise((_, reject) => {
         window.setTimeout(() => reject(new Error("semantic timeout")), semanticTimeoutMs);
       })
