@@ -4,7 +4,7 @@ console.log("[embedding] loaded");
 window.embeddingHelper = (() => {
   const MODEL_NAME = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
   const TRANSFORMERS_CDN =
-    "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js";
+    "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/+esm";
   const RUNTIME_TIMEOUT_MS = 10000;
 
   let runtimePromise = null;
@@ -131,43 +131,19 @@ window.embeddingHelper = (() => {
     }
 
     if (!runtimePromise) {
-      runtimePromise = new Promise((resolve, reject) => {
-        const timeoutId = window.setTimeout(() => {
-          reject(new Error("embedding load timeout"));
-        }, RUNTIME_TIMEOUT_MS);
-
-        const resolveWithCleanup = () => {
-          window.clearTimeout(timeoutId);
-          resolve(window.transformers);
-        };
-
-        const rejectWithCleanup = (message) => {
-          window.clearTimeout(timeoutId);
-          reject(new Error(message));
-        };
-
-        const existingScript = document.querySelector(
-          'script[data-embedding-runtime="transformers"]'
-        );
-
-        if (existingScript) {
-          existingScript.addEventListener("load", resolveWithCleanup, { once: true });
-          existingScript.addEventListener(
-            "error",
-            () => rejectWithCleanup("embedding runtime unavailable"),
-            { once: true }
-          );
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = TRANSFORMERS_CDN;
-        script.async = true;
-        script.dataset.embeddingRuntime = "transformers";
-        script.onload = resolveWithCleanup;
-        script.onerror = () => rejectWithCleanup("embedding runtime unavailable");
-        document.head.appendChild(script);
-      });
+      runtimePromise = Promise.race([
+        import(TRANSFORMERS_CDN).then((module) => {
+          const runtime = module?.env ? module : module?.default;
+          if (!runtime?.pipeline) {
+            throw new Error("embedding runtime unavailable");
+          }
+          window.transformers = runtime;
+          return runtime;
+        }),
+        new Promise((_, reject) => {
+          window.setTimeout(() => reject(new Error("embedding load timeout")), RUNTIME_TIMEOUT_MS);
+        })
+      ]);
     }
 
     return runtimePromise;
