@@ -1,3 +1,6 @@
+window.__embeddingLoaded = true;
+console.log("[embedding] loaded");
+
 window.embeddingHelper = (() => {
   const MODEL_NAME = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
   const TRANSFORMERS_CDN =

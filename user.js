@@ -46,6 +46,12 @@ const refs = {
   resultRoot: document.getElementById("resultRoot")
 };
 
+console.log("[user] boot", window.location?.href || "");
+console.log("[embedding] helper at boot:", typeof window.embeddingHelper?.rankTextAgainstRules);
+if (!window.embeddingHelper?.rankTextAgainstRules) {
+  console.warn("[embedding] helper missing on current page");
+}
+
 function buildSlots(parts = [], options = {}) {
   const requiredIndexes = options.requiredIndexes ?? parts.map((_, index) => index);
   const weightMap = options.weightMap ?? {};
