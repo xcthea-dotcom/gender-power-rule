@@ -4,7 +4,7 @@ console.log("[embedding] loaded");
 window.embeddingHelper = (() => {
   const MODEL_NAME = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
   const TRANSFORMERS_CDN =
-    "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/+esm";
+    "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2";
   const RUNTIME_TIMEOUT_MS = 10000;
 
   let runtimePromise = null;
