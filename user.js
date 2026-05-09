@@ -324,47 +324,6 @@ function requestSemanticAssist(text, selectedContext) {
     error: ""
   };
 
-  if (window.embeddingHelper?.rankTextAgainstRules) {
-    Promise.resolve()
-      .then(() =>
-        window.embeddingHelper.rankTextAgainstRules(
-          text,
-          rules.filter((rule) => rule.rule_id !== fallbackRuleId),
-          { topK: 3, threshold: 0.42, candidateLimit: 16 }
-        )
-      )
-      .then((results) => {
-        if (state.semanticAssist.key !== key) {
-          return;
-        }
-
-        state.semanticAssist = {
-          key,
-          status: "ready",
-          results: (results ?? []).map((rule) => ({
-            rule_id: rule.rule_id,
-            name: rule.name,
-            labels: rule.labels ?? [],
-            semanticSimilarity: Number(rule.semanticSimilarity ?? 0)
-          })),
-          error: ""
-        };
-        renderResult();
-      })
-      .catch(() => {
-        if (state.semanticAssist.key !== key) {
-          return;
-        }
-        requestRemoteSemanticAssist(text, selectedContext, key);
-      });
-    return;
-  }
-
-  requestRemoteSemanticAssist(text, selectedContext, key);
-}
-
-function requestRemoteSemanticAssist(text, selectedContext, key) {
-
   if (window.location?.protocol === "file:") {
     state.semanticAssist = {
       key,

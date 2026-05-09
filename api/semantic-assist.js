@@ -17,18 +17,6 @@ function loadRuleData() {
   return cachedRuleData;
 }
 
-function getBlueprintText(ruleId, slotBlueprints) {
-  const slots = slotBlueprints?.[ruleId];
-  if (!Array.isArray(slots)) {
-    return "";
-  }
-
-  return slots
-    .flatMap((slot) => (Array.isArray(slot) ? slot : []))
-    .filter(Boolean)
-    .join(" ");
-}
-
 function normalize(text) {
   return String(text ?? "")
     .replace(/[\s\u3000]+/g, "")
@@ -40,19 +28,13 @@ function normalize(text) {
 }
 
 function getPrototypeText(rule) {
-  const { slotBlueprints } = loadRuleData();
-  const blueprintText = getBlueprintText(rule.rule_id, slotBlueprints);
-
   return [
     rule.name,
     ...(rule.labels ?? []),
     ...(rule.must_include_any ?? []),
     ...(rule.must_include_any_2 ?? []),
-    rule.surface_meaning_template ?? "",
     rule.notes ?? "",
-    rule.hidden_structure_template ?? "",
-    rule.impact_template ?? "",
-    blueprintText
+    rule.hidden_structure_template ?? ""
   ]
     .filter(Boolean)
     .join(" ");
