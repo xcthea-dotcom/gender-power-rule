@@ -19,13 +19,22 @@ window.embeddingHelper = (() => {
   }
 
   function getPrototypeText(rule) {
+    const slots = window.ruleDemoData?.slotBlueprints?.[rule.rule_id] ?? [];
+    const blueprintText = slots
+      .flatMap((slot) => (Array.isArray(slot) ? slot : []))
+      .filter(Boolean)
+      .join(" ");
+
     return [
       rule.name,
       ...(rule.labels ?? []),
       ...(rule.must_include_any ?? []),
       ...(rule.must_include_any_2 ?? []),
+      rule.surface_meaning_template ?? "",
       rule.notes ?? "",
-      rule.hidden_structure_template ?? ""
+      rule.hidden_structure_template ?? "",
+      rule.impact_template ?? "",
+      blueprintText
     ]
       .filter(Boolean)
       .join(" ");
