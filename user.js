@@ -312,8 +312,7 @@ function getSemanticAssistMode(analysis) {
 }
 
 function shouldUseSemanticAssist(analysis) {
-  const { isFallback, isLowConfidence } = getSemanticAssistMode(analysis);
-  return isFallback || isLowConfidence;
+  return true;
 }
 
 function resetSemanticAssist() {
@@ -462,7 +461,6 @@ function resolveSemanticRule(result, text) {
 
 function shouldKeepSemanticCandidate(candidate, analysis) {
   const similarity = Number(candidate?.semanticSimilarity || 0);
-  const { isFallback } = getSemanticAssistMode(analysis);
   const signals = getNearMissSignals(candidate);
   const matchedSlotCount = Number(candidate?.matchedSlotCount || 0);
   const weightedSlotScore = Number(candidate?.weightedSlotScore || 0);
@@ -473,17 +471,7 @@ function shouldKeepSemanticCandidate(candidate, analysis) {
     matchedSlotCount >= 2 ||
     weightedSlotScore >= 3;
 
-  const hasStrongLocalSupport =
-    signals.matchedRequiredSlotCount >= 1 ||
-    signals.meaningfulWeightScore >= 3 ||
-    matchedSlotCount >= 2 ||
-    weightedSlotScore >= 4;
-
-  if (isFallback) {
-    return similarity >= 0.76 || (similarity >= 0.64 && hasLocalSupport);
-  }
-
-  return similarity >= 0.68 && hasLocalSupport;
+  return similarity >= 0.72 || (similarity >= 0.6 && hasLocalSupport);
 }
 
 function getSemanticCandidates(text, selectedContext, analysis) {
