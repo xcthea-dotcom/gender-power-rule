@@ -475,10 +475,21 @@ function analyzeText(text, selectedContext) {
   };
 }
 
-function shouldUseSemanticAssist(analysis) {
+function getSemanticAssistMode(analysis) {
   const primary = analysis?.primary ?? fallbackRule;
   const topScore = analysis?.topMatches?.[0]?.totalScore ?? primary?.totalScore ?? primary?.score ?? 0;
-  return primary?.rule_id === fallbackRuleId || topScore < 8;
+
+  return {
+    primary,
+    topScore,
+    isFallback: primary?.rule_id === fallbackRuleId,
+    isLowConfidence: topScore < 8
+  };
+}
+
+function shouldUseSemanticAssist(analysis) {
+  const { isFallback, isLowConfidence } = getSemanticAssistMode(analysis);
+  return isFallback || isLowConfidence;
 }
 
 function resetSemanticAssist() {
@@ -619,7 +630,33 @@ function resolveSemanticRule(result, text) {
   };
 }
 
-function getSemanticCandidates(text, selectedContext) {
+function shouldKeepSemanticCandidate(candidate, analysis) {
+  const similarity = Number(candidate?.semanticSimilarity || 0);
+  const { isFallback } = getSemanticAssistMode(analysis);
+  const signals = getNearMissSignals(candidate);
+  const matchedSlotCount = Number(candidate?.matchedSlotCount || 0);
+  const weightedSlotScore = Number(candidate?.weightedSlotScore || 0);
+
+  const hasLocalSupport =
+    signals.matchedRequiredSlotCount >= 1 ||
+    signals.meaningfulSlotCount >= 1 ||
+    matchedSlotCount >= 2 ||
+    weightedSlotScore >= 3;
+
+  const hasStrongLocalSupport =
+    signals.matchedRequiredSlotCount >= 1 ||
+    signals.meaningfulWeightScore >= 3 ||
+    matchedSlotCount >= 2 ||
+    weightedSlotScore >= 4;
+
+  if (isFallback) {
+    return similarity >= 0.84 || (similarity >= 0.72 && hasStrongLocalSupport);
+  }
+
+  return similarity >= 0.68 && hasLocalSupport;
+}
+
+function getSemanticCandidates(text, selectedContext, analysis) {
   const key = getSemanticAssistKey(text, selectedContext);
 
   if (state.semanticAssist.key !== key || state.semanticAssist.status !== "ready") {
@@ -638,7 +675,16 @@ function getSemanticCandidates(text, selectedContext) {
         semanticSimilarity: Number(item.semanticSimilarity || resolved.semanticSimilarity || 0)
       };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((candidate) => shouldKeepSemanticCandidate(candidate, analysis))
+    .sort((a, b) => {
+      const similarityDiff = Number(b.semanticSimilarity || 0) - Number(a.semanticSimilarity || 0);
+      if (similarityDiff !== 0) {
+        return similarityDiff;
+      }
+
+      return Number(b.weightedSlotScore || 0) - Number(a.weightedSlotScore || 0);
+    });
 }
 
 function getNearMisses(text, selectedContext) {
@@ -908,7 +954,8 @@ function buildAnalysisPages(analysis) {
   const result = analysis?.primary ?? fallbackRule;
   const topMatches = analysis?.topMatches ?? [];
   const nearMisses = getNearMisses(state.input, state.selectedContext);
-  const semanticCandidates = getSemanticCandidates(state.input, state.selectedContext);
+  const semanticCandidates = getSemanticCandidates(state.input, state.selectedContext, analysis);
+  const secondMatched = topMatches.find((item) => item.rule_id !== result.rule_id && item.rule_id !== fallbackRuleId);
   const pages = [];
   const usedRuleIds = new Set();
 
@@ -950,6 +997,10 @@ function buildAnalysisPages(analysis) {
       return;
     }
 
+    if (secondMatched) {
+      return;
+    }
+
     pushPage({
       sourceLabel: "语义接近",
       introTitle: "这是语义上也很接近的一种解释",
@@ -965,7 +1016,6 @@ function buildAnalysisPages(analysis) {
     });
   });
 
-  const secondMatched = topMatches.find((item) => item.rule_id !== result.rule_id && item.rule_id !== fallbackRuleId);
   if (pages.length < 2 && secondMatched) {
     pushPage({
       sourceLabel: "第二分析",
