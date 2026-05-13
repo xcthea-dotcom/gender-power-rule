@@ -480,7 +480,7 @@ function shouldKeepSemanticCandidate(candidate, analysis) {
     weightedSlotScore >= 4;
 
   if (isFallback) {
-    return similarity >= 0.8 || (similarity >= 0.68 && hasLocalSupport);
+    return similarity >= 0.76 || (similarity >= 0.64 && hasLocalSupport);
   }
 
   return similarity >= 0.68 && hasLocalSupport;
