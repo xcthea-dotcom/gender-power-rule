@@ -634,6 +634,17 @@ function shouldKeepSemanticCandidate(candidate, analysis) {
   const signals = getNearMissSignals(candidate);
   const matchedSlotCount = Number(candidate?.matchedSlotCount || 0);
   const weightedSlotScore = Number(candidate?.weightedSlotScore || 0);
+  const text = normalize(state.input || "");
+
+  // Keep neutral autonomy statements like "她选择结婚是她自己的决定"
+  // from being semantically dragged into marriage/family-regulation rules.
+  if (
+    text.includes("自己的决定") &&
+    (text.includes("选择结婚") || text.includes("结婚")) &&
+    ["R022", "R028"].includes(candidate?.rule_id)
+  ) {
+    return false;
+  }
 
   const hasLocalSupport =
     signals.matchedRequiredSlotCount >= 1 ||
