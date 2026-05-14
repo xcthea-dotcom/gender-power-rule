@@ -641,7 +641,7 @@ function shouldKeepSemanticCandidate(candidate, analysis) {
     matchedSlotCount >= 2 ||
     weightedSlotScore >= 3;
 
-  return similarity >= 0.58 || (similarity >= 0.46 && hasLocalSupport);
+  return similarity >= 0.6 || (similarity >= 0.48 && hasLocalSupport);
 }
 
 function getSemanticCandidates(text, selectedContext, analysis) {
